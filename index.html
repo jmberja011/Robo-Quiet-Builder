@@ -1,0 +1,3229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>RoboCity Builders — Classroom Noise Detector &amp; Quiet Work Timer</title>
+
+  <!-- Google Fonts: Fredoka (friendly sci-fi display) & Nunito (clean rounded UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Fredoka', 'Nunito', 'sans-serif'],
+            sans: ['Nunito', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            ink: '#162233',
+            twilightDeep: '#122036',
+            twilightMid: '#1d3954',
+            twilightTeal: '#2a5870',
+            cyberCyan: '#38e8ff',
+            coralEnergy: '#ff7b47',
+            deckSlate: '#243547',
+            deckLight: '#31465c',
+            frostedCard: '#f4f9ff',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* =========================================================================
+       ROBOCITY BUILDERS — STORYBOOK SCI-FI ILLUSTRATION STYLES & ANIMATIONS
+       ========================================================================= */
+    :root {
+      --ink-outline: #162233;
+      --sky-top: #122036;
+      --sky-mid: #1d3954;
+      --sky-low: #2a5870;
+      --cyber-cyan: #38e8ff;
+      --coral-energy: #ff7b47;
+      --deck-dark: #243547;
+      --deck-mid: #31465c;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--sky-top);
+      color: var(--ink-outline);
+      font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+      user-select: none;
+    }
+
+    .font-display {
+      font-family: 'Fredoka', 'Nunito', sans-serif;
+    }
+
+    /* Frosted Storybook Sci-Fi Cards & Tactile Buttons */
+    .robo-pill {
+      background: rgba(244, 249, 255, 0.94);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 2.5px solid #162233;
+      box-shadow: 0 4px 0 #162233, 0 10px 24px rgba(8, 16, 30, 0.32);
+    }
+
+    .robo-btn {
+      background: #f4f9ff;
+      border: 2.5px solid #162233;
+      box-shadow: 0 3px 0 #162233;
+      transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.12s ease, background-color 0.15s ease;
+    }
+
+    .robo-btn:hover {
+      background: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 0 #162233;
+    }
+
+    .robo-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #162233;
+    }
+
+    .robo-btn-cyan {
+      background: linear-gradient(180deg, #6df0ff 0%, #38e8ff 100%);
+      color: #162233;
+      border: 2.5px solid #162233;
+      box-shadow: 0 4px 0 #162233, 0 0 18px rgba(56, 232, 255, 0.35);
+      transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.12s ease, filter 0.15s ease;
+    }
+
+    .robo-btn-cyan:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+      box-shadow: 0 5px 0 #162233, 0 0 22px rgba(56, 232, 255, 0.5);
+    }
+
+    .robo-btn-cyan:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #162233;
+    }
+
+    .robo-btn-coral {
+      background: linear-gradient(180deg, #ff966b 0%, #ff7b47 100%);
+      color: #ffffff;
+      border: 2.5px solid #162233;
+      box-shadow: 0 4px 0 #162233, 0 0 16px rgba(255, 123, 71, 0.32);
+      transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.12s ease, filter 0.15s ease;
+    }
+
+    .robo-btn-coral:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .robo-btn-coral:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #162233;
+    }
+
+    .robo-btn-navy {
+      background: #1a2d45;
+      color: #f4f9ff;
+      border: 2.5px solid #38e8ff;
+      box-shadow: 0 3px 0 #0d1724, 0 0 14px rgba(56, 232, 255, 0.25);
+      transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.12s ease, background-color 0.15s ease;
+    }
+
+    .robo-btn-navy:hover {
+      background: #233c5b;
+      transform: translateY(-1px);
+    }
+
+    .robo-btn-navy:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #0d1724;
+    }
+
+    /* Twinkling Twilight Stars */
+    @keyframes starTwinkle {
+      0%, 100% { opacity: 0.25; transform: scale(0.85); }
+      50% { opacity: 0.95; transform: scale(1.15); }
+    }
+    .star-twinkle-1 { transform-box: fill-box; transform-origin: center; animation: starTwinkle 3.4s ease-in-out infinite; }
+    .star-twinkle-2 { transform-box: fill-box; transform-origin: center; animation: starTwinkle 4.6s ease-in-out infinite 1.2s; }
+    .star-twinkle-3 { transform-box: fill-box; transform-origin: center; animation: starTwinkle 2.8s ease-in-out infinite 0.6s; }
+
+    /* Drifting Twilight Clouds */
+    @keyframes cloudDriftA {
+      0%, 100% { transform: translateX(0px); }
+      50% { transform: translateX(18px); }
+    }
+    @keyframes cloudDriftB {
+      0%, 100% { transform: translateX(0px); }
+      50% { transform: translateX(-16px); }
+    }
+    .cloud-drift-a { animation: cloudDriftA 18s ease-in-out infinite; }
+    .cloud-drift-b { animation: cloudDriftB 23s ease-in-out infinite; }
+
+    /* Hovering Robot Bobbing & Celebration Cheer */
+    @keyframes robotHover {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+    @keyframes droneHover {
+      0%, 100% { transform: translateY(0px) rotate(-1.5deg); }
+      50% { transform: translateY(-8px) rotate(1.5deg); }
+    }
+    @keyframes robotCheer {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      28% { transform: translateY(-15px) scale(1.04, 0.96); }
+      58% { transform: translateY(-5px) scale(0.98, 1.03); }
+    }
+    .bot-hover-atlas {
+      transform-box: fill-box;
+      transform-origin: bottom center;
+      animation: robotHover 3.1s ease-in-out infinite;
+    }
+    .bot-hover-beep {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: robotHover 2.6s ease-in-out infinite 0.5s;
+    }
+    .bot-hover-boop {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: droneHover 2.9s ease-in-out infinite 0.2s;
+    }
+    .bot-cheer {
+      transform-box: fill-box;
+      transform-origin: bottom center;
+      animation: robotCheer 0.68s cubic-bezier(0.22, 1, 0.36, 1) 2;
+    }
+
+    /* Rotor Spin on Drone Bot BOOP */
+    @keyframes rotorSpin {
+      0%, 100% { transform: scaleX(1); }
+      50% { transform: scaleX(0.22); }
+    }
+    .drone-rotor {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: rotorSpin 0.16s linear infinite;
+    }
+
+    /* Tractor Beam Pulse */
+    @keyframes tractorPulse {
+      0%, 100% { opacity: 0.32; }
+      50% { opacity: 0.62; }
+    }
+    .tractor-beam-glow {
+      animation: tractorPulse 1.8s ease-in-out infinite;
+    }
+
+    /* Transient Spike Ripple on Top-Right Sound Pill */
+    @keyframes spikeRipple {
+      0% { transform: scale(0.95); opacity: 0.9; }
+      100% { transform: scale(2.1); opacity: 0; }
+    }
+    .mic-spike-ring {
+      animation: spikeRipple 0.65s ease-out forwards;
+    }
+
+    /* Module Lock-In Pop & Energy Spark Burst */
+    @keyframes moduleLockSettle {
+      0% { transform: scale(1.09, 0.9); }
+      50% { transform: scale(0.96, 1.04); }
+      100% { transform: scale(1, 1); }
+    }
+    .module-lock-settle {
+      transform-box: fill-box;
+      transform-origin: bottom center;
+      animation: moduleLockSettle 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes energySparkBurst {
+      0% { opacity: 1; transform: scale(0.3) translateY(0); }
+      100% { opacity: 0; transform: scale(1.75) translateY(-14px); }
+    }
+    .energy-spark {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: energySparkBurst 0.7s ease-out forwards;
+    }
+
+    /* Custom Range Sliders */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 8px;
+      border-radius: 999px;
+      background: #d7e5f5;
+      border: 1.5px solid #162233;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #38e8ff;
+      border: 2.5px solid #162233;
+      margin-top: -7.5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    }
+    input[type="range"]::-moz-range-track {
+      height: 8px;
+      border-radius: 999px;
+      background: #d7e5f5;
+      border: 1.5px solid #162233;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #38e8ff;
+      border: 2.5px solid #162233;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Custom Scrollbar for Modals */
+    .custom-scroll::-webkit-scrollbar {
+      width: 7px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #e1ecf8;
+      border-radius: 999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #8aa4c2;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body class="relative w-screen h-screen overflow-hidden flex flex-col justify-between">
+
+  <!-- =======================================================================
+       1. FULL-BLEED STORYBOOK FUTURISTIC CITY CONSTRUCTION SCENE (SVG)
+       ======================================================================= -->
+  <div class="absolute inset-0 w-full h-full pointer-events-none z-0">
+    <svg
+      id="scene-svg"
+      class="w-full h-full"
+      viewBox="0 0 1200 720"
+      preserveAspectRatio="xMidYMax slice"
+      aria-label="RoboCity Builders Futuristic Construction Scene"
+    >
+      <defs>
+        <!-- Rich Twilight Sky Gradient (#122036 -> #1d3954 -> #2a5870) -->
+        <linearGradient id="twilightSkyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#122036" />
+          <stop offset="52%" stop-color="#1d3954" />
+          <stop offset="100%" stop-color="#2a5870" />
+        </linearGradient>
+
+        <!-- Distant Metropolis Silhouette Gradient -->
+        <linearGradient id="distantCityGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#182e46" />
+          <stop offset="100%" stop-color="#132438" />
+        </linearGradient>
+
+        <!-- Midground Metropolis Silhouette Gradient -->
+        <linearGradient id="midCityGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#203b57" />
+          <stop offset="100%" stop-color="#172b42" />
+        </linearGradient>
+
+        <!-- Foreground Brushed Metallic-Slate Deck Gradient -->
+        <linearGradient id="metallicDeckGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#31465c" />
+          <stop offset="30%" stop-color="#243547" />
+          <stop offset="100%" stop-color="#192634" />
+        </linearGradient>
+
+        <!-- Tractor Beam Cyan Gradient -->
+        <linearGradient id="tractorCyanGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#38e8ff" stop-opacity="0.72" />
+          <stop offset="100%" stop-color="#38e8ff" stop-opacity="0.06" />
+        </linearGradient>
+
+        <!-- Tractor Beam Alert Amber/Red Gradient -->
+        <linearGradient id="tractorAlertGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ff7b47" stop-opacity="0.72" />
+          <stop offset="100%" stop-color="#ff7b47" stop-opacity="0.06" />
+        </linearGradient>
+
+        <!-- Clip Path for Active Cyber-Block Fill Progress -->
+        <clipPath id="activeCyberBlockClip">
+          <rect x="-32" y="-22" width="64" height="44" rx="6" />
+        </clipPath>
+      </defs>
+
+      <!-- TWILIGHT SKY BACKGROUND -->
+      <rect x="0" y="0" width="1200" height="720" fill="url(#twilightSkyGrad)" />
+
+      <!-- TWINKLING STARS -->
+      <g fill="#f4f9ff">
+        <circle cx="95" cy="72" r="2.2" class="star-twinkle-1" />
+        <circle cx="168" cy="145" r="1.6" class="star-twinkle-2" />
+        <circle cx="255" cy="58" r="2.5" class="star-twinkle-3" />
+        <circle cx="340" cy="128" r="1.8" class="star-twinkle-1" />
+        <circle cx="430" cy="48" r="2.1" class="star-twinkle-2" />
+        <circle cx="670" cy="54" r="2.4" class="star-twinkle-3" />
+        <circle cx="765" cy="118" r="1.7" class="star-twinkle-1" />
+        <circle cx="855" cy="66" r="2.6" class="star-twinkle-2" />
+        <circle cx="1065" cy="84" r="2.2" class="star-twinkle-3" />
+        <circle cx="1142" cy="146" r="1.8" class="star-twinkle-1" />
+        <!-- Four-point sparkle stars -->
+        <path d="M210,96 L212,102 L218,104 L212,106 L210,112 L208,106 L202,104 L208,102 Z" fill="#8ef3ff" class="star-twinkle-2" />
+        <path d="M815,82 L817,88 L823,90 L817,92 L815,98 L813,92 L807,90 L813,88 Z" fill="#ffd98e" class="star-twinkle-1" />
+      </g>
+
+      <!-- GLOWING RINGED PLANET & CRESCENT MOON -->
+      <!-- Ringed Planet (Upper Left) -->
+      <g transform="translate(135, 118)" opacity="0.92">
+        <circle cx="0" cy="0" r="26" fill="#ff9f68" stroke="#162233" stroke-width="2.2" />
+        <path d="M-22,-7 Q0,-2 22,-7" fill="none" stroke="#ffd2a6" stroke-width="3" opacity="0.65" />
+        <path d="M-24,6 Q0,11 24,6" fill="none" stroke="#d95f2b" stroke-width="2.5" opacity="0.55" />
+        <ellipse
+          cx="0"
+          cy="2"
+          rx="44"
+          ry="10"
+          transform="rotate(-16)"
+          fill="none"
+          stroke="#6df0ff"
+          stroke-width="3.5"
+        />
+      </g>
+
+      <!-- Glowing Crescent Moon (Upper Right-Center) -->
+      <g transform="translate(895, 108)" opacity="0.95">
+        <circle cx="0" cy="0" r="30" fill="#ffe799" opacity="0.14" />
+        <path
+          d="M8,-20 A21,21 0 1,0 22,12 A17,17 0 1,1 8,-20 Z"
+          fill="#ffe799"
+          stroke="#162233"
+          stroke-width="2.2"
+          stroke-linejoin="round"
+        />
+      </g>
+
+      <!-- DRIFTING TRANSLUCENT TWILIGHT CLOUDS -->
+      <g class="cloud-drift-a" opacity="0.22">
+        <path
+          d="M190,192 C190,176 206,166 222,169 C232,150 258,148 271,165 C288,162 305,174 305,191 C305,204 292,212 277,212 L212,212 C199,212 190,203 190,192 Z"
+          fill="#9ad8f5"
+        />
+      </g>
+      <g class="cloud-drift-b" opacity="0.2">
+        <path
+          d="M720,164 C720,147 738,136 756,140 C768,119 798,117 812,137 C831,134 850,147 850,166 C850,181 836,190 819,190 L745,190 C730,190 720,179 720,164 Z"
+          fill="#9ad8f5"
+        />
+      </g>
+
+      <!-- ===================================================================
+           DISTANT FUTURISTIC METROPOLIS HORIZON (Spires, Domes & Glowing Lights)
+           =================================================================== -->
+      <g id="distant-metropolis">
+        <!-- Far Silhouette Layer -->
+        <g fill="url(#distantCityGrad)">
+          <rect x="0" y="345" width="68" height="200" rx="4" />
+          <polygon points="34,295 16,345 52,345" />
+          <rect x="82" y="370" width="84" height="175" rx="6" />
+          <path d="M90,370 A34,28 0 0,1 158,370 Z" />
+          <rect x="195" y="325" width="58" height="220" rx="4" />
+          <rect x="221" y="280" width="6" height="45" />
+          <rect x="275" y="385" width="95" height="160" rx="8" />
+          <rect x="595" y="330" width="64" height="215" rx="4" />
+          <polygon points="627,276 609,330 645,330" />
+          <rect x="678" y="372" width="92" height="173" rx="6" />
+          <path d="M686,372 A38,30 0 0,1 762,372 Z" />
+          <rect x="795" y="340" width="62" height="205" rx="4" />
+          <rect x="1075" y="335" width="75" height="210" rx="5" />
+          <polygon points="1112,282 1092,335 1132,335" />
+          <rect x="1158" y="375" width="55" height="170" />
+        </g>
+
+        <!-- Closer Mid-City Towers with Warm & Cyan Windows -->
+        <g fill="url(#midCityGrad)" stroke="#162233" stroke-width="1.8">
+          <rect x="24" y="395" width="72" height="150" rx="5" />
+          <rect x="128" y="362" width="64" height="183" rx="5" />
+          <rect x="230" y="405" width="86" height="140" rx="6" />
+          <rect x="615" y="388" width="74" height="157" rx="5" />
+          <rect x="735" y="356" width="68" height="189" rx="5" />
+          <rect x="835" y="402" width="82" height="143" rx="6" />
+          <rect x="1095" y="385" width="78" height="160" rx="5" />
+        </g>
+
+        <!-- Glowing City Windows & Beacon Lights -->
+        <g opacity="0.75">
+          <!-- Warm golden windows -->
+          <rect x="40" y="412" width="12" height="6" rx="2" fill="#ffd97d" />
+          <rect x="64" y="412" width="12" height="6" rx="2" fill="#ffd97d" />
+          <rect x="40" y="428" width="12" height="6" rx="2" fill="#38e8ff" />
+          <rect x="144" y="382" width="14" height="6" rx="2" fill="#ffd97d" />
+          <rect x="144" y="398" width="14" height="6" rx="2" fill="#ffd97d" />
+          <rect x="164" y="398" width="14" height="6" rx="2" fill="#38e8ff" />
+          <rect x="250" y="420" width="44" height="5" rx="2" fill="#38e8ff" />
+          <rect x="632" y="405" width="14" height="6" rx="2" fill="#ffd97d" />
+          <rect x="656" y="405" width="14" height="6" rx="2" fill="#38e8ff" />
+          <rect x="752" y="376" width="14" height="6" rx="2" fill="#ffd97d" />
+          <rect x="772" y="376" width="14" height="6" rx="2" fill="#ffd97d" />
+          <rect x="854" y="418" width="42" height="5" rx="2" fill="#38e8ff" />
+          <rect x="1114" y="404" width="16" height="6" rx="2" fill="#ffd97d" />
+          <rect x="1138" y="404" width="16" height="6" rx="2" fill="#38e8ff" />
+          <!-- Spire Beacon Dots -->
+          <circle cx="34" cy="293" r="2.8" fill="#ff7b47" />
+          <circle cx="224" cy="278" r="2.8" fill="#38e8ff" />
+          <circle cx="627" cy="274" r="2.8" fill="#ff7b47" />
+          <circle cx="1112" cy="280" r="2.8" fill="#38e8ff" />
+        </g>
+
+        <!-- =================================================================
+             SLEEK AUTOMATED SKY-MONORAIL TRACK & GLIDING TRAIN (y = 456)
+             ================================================================= -->
+        <g id="sky-monorail-system">
+          <!-- Support Pylons -->
+          <rect x="115" y="460" width="8" height="80" fill="#182b40" stroke="#162233" stroke-width="1.5" />
+          <rect x="335" y="460" width="8" height="80" fill="#182b40" stroke="#162233" stroke-width="1.5" />
+          <rect x="665" y="460" width="8" height="80" fill="#182b40" stroke="#162233" stroke-width="1.5" />
+          <rect x="895" y="460" width="8" height="80" fill="#182b40" stroke="#162233" stroke-width="1.5" />
+
+          <!-- Elevated Monorail Beam -->
+          <rect x="0" y="454" width="1200" height="7" fill="#2b4663" stroke="#162233" stroke-width="1.8" />
+          <line x1="0" y1="457" x2="1200" y2="457" stroke="#38e8ff" stroke-width="1.4" opacity="0.55" />
+
+          <!-- Gliding Glowing Monorail Train (Position driven smoothly via JS) -->
+          <g id="sky-monorail-train" transform="translate(220, 440)">
+            <!-- Car 1 -->
+            <rect x="0" y="2" width="44" height="12" rx="6" fill="#e8f3ff" stroke="#162233" stroke-width="1.8" />
+            <rect x="6" y="5" width="32" height="4.5" rx="2" fill="#38e8ff" />
+            <!-- Coupler -->
+            <rect x="44" y="6" width="5" height="4" fill="#162233" />
+            <!-- Car 2 (Lead Aerodynamic Nose) -->
+            <path
+              d="M49,2 L88,2 C96,2 101,7 101,14 L49,14 Z"
+              fill="#e8f3ff"
+              stroke="#162233"
+              stroke-width="1.8"
+              stroke-linejoin="round"
+            />
+            <rect x="54" y="5" width="34" height="4.5" rx="2" fill="#38e8ff" />
+            <!-- Headlight & Hover Underglow -->
+            <circle cx="98" cy="10" r="2.3" fill="#ff7b47" />
+            <line id="monorail-underglow" x1="8" y1="15" x2="94" y2="15" stroke="#38e8ff" stroke-width="2" opacity="0.85" />
+          </g>
+        </g>
+      </g>
+
+      <!-- ===================================================================
+           FOREGROUND METALLIC-SLATE CONSTRUCTION PLATFORM DECK (y = 536..720)
+           =================================================================== -->
+      <g id="foreground-deck">
+        <!-- Main Deck Body -->
+        <rect x="0" y="536" width="1200" height="184" fill="url(#metallicDeckGrad)" />
+
+        <!-- Top Armored Deck Trim & Hazard/Energy Stripe -->
+        <rect x="0" y="532" width="1200" height="9" fill="#3c546e" stroke="#162233" stroke-width="2.4" />
+        <!-- Glowing Cyan Energy Conduit Line -->
+        <line x1="0" y1="536.5" x2="1200" y2="536.5" stroke="#38e8ff" stroke-width="2.2" opacity="0.85" />
+
+        <!-- Perspective Holographic Blueprint Grid Lines on Platform -->
+        <g stroke="#38e8ff" stroke-width="1.3" opacity="0.22">
+          <line x1="0" y1="564" x2="1200" y2="564" />
+          <line x1="0" y1="602" x2="1200" y2="602" />
+          <line x1="0" y1="650" x2="1200" y2="650" />
+          <line x1="140" y1="541" x2="60" y2="720" />
+          <line x1="310" y1="541" x2="265" y2="720" />
+          <line x1="485" y1="541" x2="485" y2="720" />
+          <line x1="660" y1="541" x2="705" y2="720" />
+          <line x1="830" y1="541" x2="910" y2="720" />
+          <line x1="1010" y1="541" x2="1120" y2="720" />
+        </g>
+
+        <!-- Corner Warning Chevron Accents -->
+        <g fill="#ff7b47" opacity="0.85">
+          <polygon points="32,533 46,533 38,540 24,540" />
+          <polygon points="56,533 70,533 62,540 48,540" />
+          <polygon points="1130,533 1144,533 1136,540 1122,540" />
+          <polygon points="1154,533 1168,533 1160,540 1146,540" />
+        </g>
+      </g>
+
+      <!-- ===================================================================
+           CENTRAL ILLUMINATED CONSTRUCTION PAD & BUILDING ASSEMBLY (x = 485)
+           =================================================================== -->
+      <g id="construction-site" transform="translate(485, 534)">
+        <!-- Cyan Holographic Pad Aura -->
+        <ellipse cx="0" cy="4" rx="124" ry="12" fill="#38e8ff" opacity="0.18" />
+
+        <!-- Armored Foundation Pad -->
+        <rect x="-104" y="-12" width="208" height="14" rx="5" fill="#3b5169" stroke="#162233" stroke-width="2.6" />
+        <!-- Glowing Cyan Pad Lock Clamps -->
+        <rect x="-92" y="-15" width="16" height="6" rx="2" fill="#38e8ff" stroke="#162233" stroke-width="1.8" />
+        <rect x="76" y="-15" width="16" height="6" rx="2" fill="#38e8ff" stroke="#162233" stroke-width="1.8" />
+        <line x1="-68" y1="-6" x2="68" y2="-6" stroke="#38e8ff" stroke-width="2.4" stroke-linecap="round" />
+
+        <!-- Dynamic Progressive Futuristic Building Modules Rendered Here -->
+        <g id="building-assembly-layer" transform="translate(0, -12)"></g>
+
+        <!-- Celebratory Energy Spark Burst Layer -->
+        <g id="building-fx-layer" transform="translate(0, -12)"></g>
+      </g>
+
+      <!-- ===================================================================
+           ANTI-GRAVITY BUILDER GANTRY (Sleek White & Coral Futuristic Crane)
+           =================================================================== -->
+      <g id="anti-gravity-gantry">
+        <!-- Energy Stabilizer Cables from Apex (985, 92) -->
+        <line x1="985" y1="92" x2="465" y2="174" stroke="#38e8ff" stroke-width="2.2" opacity="0.78" />
+        <line x1="985" y1="92" x2="725" y2="174" stroke="#38e8ff" stroke-width="1.8" opacity="0.55" />
+        <line x1="985" y1="92" x2="1138" y2="174" stroke="#ff7b47" stroke-width="2.2" opacity="0.85" />
+
+        <!-- Gantry Heavy Armored Base on Platform Deck (x = 985, y = 534) -->
+        <rect x="950" y="514" width="70" height="22" rx="6" fill="#2d4156" stroke="#162233" stroke-width="2.6" />
+        <rect x="960" y="502" width="50" height="14" rx="4" fill="#ff7b47" stroke="#162233" stroke-width="2.4" />
+
+        <!-- Vertical White & Coral Armored Lattice Tower (x: 968..1002, y: 146..502) -->
+        <g id="gantry-mast">
+          <!-- Left & Right Sleek White Columns -->
+          <rect x="968" y="146" width="8" height="356" rx="3" fill="#f4f9ff" stroke="#162233" stroke-width="2.3" />
+          <rect x="994" y="146" width="8" height="356" rx="3" fill="#f4f9ff" stroke="#162233" stroke-width="2.3" />
+
+          <!-- Coral-Amber Cross-Bracing & Cyan Power Core Spine -->
+          <line x1="985" y1="152" x2="985" y2="498" stroke="#38e8ff" stroke-width="3" opacity="0.7" />
+          <g stroke="#ff7b47" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="976" y1="196" x2="994" y2="196" />
+            <line x1="976" y1="246" x2="994" y2="246" />
+            <line x1="976" y1="296" x2="994" y2="296" />
+            <line x1="976" y1="346" x2="994" y2="346" />
+            <line x1="976" y1="396" x2="994" y2="396" />
+            <line x1="976" y1="446" x2="994" y2="446" />
+            <polyline
+              fill="none"
+              points="976,154 994,196 976,246 994,296 976,346 994,396 976,446 994,496"
+            />
+          </g>
+        </g>
+
+        <!-- Top Gantry Sensor Spire (Apex at 985, 92) -->
+        <polygon
+          points="968,146 985,92 1002,146"
+          fill="#f4f9ff"
+          stroke="#162233"
+          stroke-width="2.5"
+          stroke-linejoin="round"
+        />
+        <circle cx="985" cy="90" r="6" fill="#38e8ff" stroke="#162233" stroke-width="2.2" />
+
+        <!-- Horizontal Lattice Energy-Beam Jib (x: 410..1148, y: 172..194) -->
+        <g id="gantry-jib">
+          <!-- Top & Bottom Sleek White Beams -->
+          <rect x="410" y="170" width="738" height="6" rx="3" fill="#f4f9ff" stroke="#162233" stroke-width="2.2" />
+          <rect x="410" y="190" width="738" height="6" rx="3" fill="#f4f9ff" stroke="#162233" stroke-width="2.2" />
+
+          <!-- Coral Lattice Zig-Zag Inside Jib -->
+          <polyline
+            fill="none"
+            stroke="#ff7b47"
+            stroke-width="3"
+            stroke-linejoin="round"
+            points="418,190 442,176 466,190 490,176 514,190 538,176 562,190 586,176 610,190 634,176 658,190 682,176 706,190 730,176 754,190 778,176 802,190 826,176 850,190 874,176 898,190 922,176 946,190 970,176 994,190 1018,176 1042,190 1066,176 1090,190 1114,176 1138,190"
+          />
+          <!-- Glowing Cyan Emitter Tip at Left Nose -->
+          <polygon points="410,170 392,183 410,196" fill="#38e8ff" stroke="#162233" stroke-width="2.2" stroke-linejoin="round" />
+        </g>
+
+        <!-- Counter-Balance Fusion Capacitor on Right Counter-Jib -->
+        <g transform="translate(1096, 196)">
+          <rect x="8" y="0" width="6" height="12" fill="#162233" />
+          <rect x="30" y="0" width="6" height="12" fill="#162233" />
+          <rect x="0" y="10" width="44" height="32" rx="6" fill="#ff7b47" stroke="#162233" stroke-width="2.4" />
+          <rect x="8" y="18" width="28" height="7" rx="3" fill="#38e8ff" stroke="#162233" stroke-width="1.6" />
+        </g>
+
+        <!-- =================================================================
+             MAGNETIC TROLLEY & PULSING TRACTOR-BEAM HOIST (Aligned at x = 485)
+             ================================================================= -->
+        <g id="gantry-trolley-system" transform="translate(485, 196)">
+          <!-- Sleek Magnetic Trolley Carriage -->
+          <rect x="-26" y="-6" width="52" height="16" rx="6" fill="#f4f9ff" stroke="#162233" stroke-width="2.4" />
+          <rect x="-16" y="-2" width="32" height="6" rx="3" fill="#38e8ff" />
+
+          <!-- Tractor-Beam Emitter Ring -->
+          <rect x="-14" y="10" width="28" height="8" rx="3" fill="#ff7b47" stroke="#162233" stroke-width="2" />
+
+          <!-- Pulsing Tractor-Beam Cone (Dynamic Height & Color via JS) -->
+          <polygon
+            id="tractor-beam-cone"
+            points="-10,18 10,18 28,96 -28,96"
+            fill="url(#tractorCyanGrad)"
+            class="tractor-beam-glow"
+          />
+
+          <!-- Center Energy Guide Line -->
+          <line
+            id="tractor-beam-core"
+            x1="0"
+            y1="18"
+            x2="0"
+            y2="96"
+            stroke="#38e8ff"
+            stroke-width="2.6"
+            stroke-dasharray="6 4"
+            stroke-linecap="round"
+          />
+
+          <!-- Dynamic Lowering Modular Cyber-Block Assembly -->
+          <g id="gantry-hoist-assembly" transform="translate(0, 96)">
+            <!-- State A: Dashed Holographic Blueprint Target Slot (Before Start) -->
+            <g id="hanging-dashed-slot">
+              <rect
+                x="-30"
+                y="-21"
+                width="60"
+                height="42"
+                rx="7"
+                fill="#38e8ff"
+                fill-opacity="0.14"
+                stroke="#38e8ff"
+                stroke-width="2.5"
+                stroke-dasharray="7 5"
+              />
+              <circle cx="0" cy="0" r="5" fill="#38e8ff" opacity="0.7" />
+            </g>
+
+            <!-- State B: Active Glowing Modular Cyber-Block Being Lowered -->
+            <g id="hanging-active-block" class="hidden">
+              <!-- Translucent Holographic Shell -->
+              <rect
+                x="-32"
+                y="-22"
+                width="64"
+                height="44"
+                rx="6"
+                fill="#162233"
+                fill-opacity="0.72"
+                stroke="#162233"
+                stroke-width="2.5"
+              />
+              <!-- Rising Energy Fill Inside Active Cyber-Block -->
+              <g clip-path="url(#activeCyberBlockClip)">
+                <rect
+                  id="active-block-fill-rect"
+                  x="-32"
+                  y="22"
+                  width="64"
+                  height="0"
+                  fill="#38e8ff"
+                />
+              </g>
+              <!-- Crisp Outline & Top Connectors -->
+              <rect
+                x="-32"
+                y="-22"
+                width="64"
+                height="44"
+                rx="6"
+                fill="none"
+                stroke="#162233"
+                stroke-width="2.5"
+              />
+              <rect x="-20" y="-27" width="12" height="5" rx="2" fill="#38e8ff" stroke="#162233" stroke-width="2" />
+              <rect x="8" y="-27" width="12" height="5" rx="2" fill="#38e8ff" stroke="#162233" stroke-width="2" />
+            </g>
+          </g>
+        </g>
+      </g>
+
+      <!-- ===================================================================
+           ADORABLE ANIMATED ROBOT CREW (Clean #162233 Outlines)
+           =================================================================== -->
+
+      <!-- 1. CHIEF BOT A.T.L.A.S. (Left Foreground, x = 165, y = 532) -->
+      <g id="character-atlas" transform="translate(165, 532)">
+        <!-- Soft Hover Thruster Shadow on Deck -->
+        <ellipse cx="0" cy="5" rx="56" ry="8" fill="#38e8ff" opacity="0.28" />
+
+        <g id="atlas-body-anim" class="bot-hover-atlas">
+          <!-- Hover-Thruster Base Ring & Glowing Plasma Plume -->
+          <ellipse cx="0" cy="-8" rx="28" ry="7" fill="#38e8ff" opacity="0.75" />
+          <path
+            d="M-34,-18 L34,-18 L26,-8 L-26,-8 Z"
+            fill="#3b5169"
+            stroke="#162233"
+            stroke-width="2.5"
+            stroke-linejoin="round"
+          />
+
+          <!-- Plump White & Coral Supervisor Torso -->
+          <rect
+            x="-48"
+            y="-92"
+            width="96"
+            height="74"
+            rx="32"
+            fill="#f4f9ff"
+            stroke="#162233"
+            stroke-width="2.8"
+          />
+          <!-- Coral Shoulder Pauldrons -->
+          <path
+            d="M-48,-66 C-56,-78 -44,-92 -30,-92 L-24,-74 Z"
+            fill="#ff7b47"
+            stroke="#162233"
+            stroke-width="2.4"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M48,-66 C56,-78 44,-92 30,-92 L24,-74 Z"
+            fill="#ff7b47"
+            stroke="#162233"
+            stroke-width="2.4"
+            stroke-linejoin="round"
+          />
+
+          <!-- Articulated Mechanical Arms & Clamps -->
+          <g id="atlas-arms">
+            <!-- Left Arm -->
+            <path d="M-48,-54 Q-64,-44 -58,-28" fill="none" stroke="#8aa4c2" stroke-width="8" stroke-linecap="round" />
+            <path d="M-48,-54 Q-64,-44 -58,-28" fill="none" stroke="#162233" stroke-width="2.5" stroke-linecap="round" />
+            <circle cx="-58" cy="-26" r="8" fill="#ff7b47" stroke="#162233" stroke-width="2.4" />
+            <!-- Right Arm -->
+            <path d="M48,-54 Q64,-44 58,-28" fill="none" stroke="#8aa4c2" stroke-width="8" stroke-linecap="round" />
+            <path d="M48,-54 Q64,-44 58,-28" fill="none" stroke="#162233" stroke-width="2.5" stroke-linecap="round" />
+            <circle cx="58" cy="-26" r="8" fill="#ff7b47" stroke="#162233" stroke-width="2.4" />
+          </g>
+
+          <!-- Chest Sound-Wave Monitor Screen -->
+          <rect
+            x="-28"
+            y="-68"
+            width="56"
+            height="34"
+            rx="8"
+            fill="#142336"
+            stroke="#162233"
+            stroke-width="2.4"
+          />
+          <!-- Dynamic Sound Wave Path Inside Chest Screen (Calm Cyan vs Spiky Coral-Red) -->
+          <path
+            id="atlas-chest-wave"
+            d="M-21,-51 Q-14,-57 -7,-51 T7,-51 T21,-51"
+            fill="none"
+            stroke="#38e8ff"
+            stroke-width="2.8"
+            stroke-linecap="round"
+          />
+
+          <!-- Rounded Helmet Head with Glowing LED Visor Face -->
+          <rect
+            x="-36"
+            y="-142"
+            width="72"
+            height="50"
+            rx="24"
+            fill="#f4f9ff"
+            stroke="#162233"
+            stroke-width="2.8"
+          />
+          <!-- Ear Audio Pods -->
+          <rect x="-43" y="-126" width="8" height="20" rx="4" fill="#ff7b47" stroke="#162233" stroke-width="2.2" />
+          <rect x="35" y="-126" width="8" height="20" rx="4" fill="#ff7b47" stroke="#162233" stroke-width="2.2" />
+
+          <!-- Dark Glass LED Visor -->
+          <rect x="-27" y="-132" width="54" height="30" rx="13" fill="#142336" />
+
+          <!-- Happy Curved LED Eyes (Quiet State) -->
+          <g id="atlas-eyes-happy">
+            <path d="M-17,-118 Q-12,-125 -7,-118" fill="none" stroke="#38e8ff" stroke-width="3" stroke-linecap="round" />
+            <path d="M7,-118 Q12,-125 17,-118" fill="none" stroke="#38e8ff" stroke-width="3" stroke-linecap="round" />
+            <path d="M-5,-110 Q0,-106 5,-110" fill="none" stroke="#38e8ff" stroke-width="2.4" stroke-linecap="round" />
+          </g>
+
+          <!-- Alert LED Eyes & Shh Mouth (Too Loud State) -->
+          <g id="atlas-eyes-loud" class="hidden">
+            <circle cx="-12" cy="-119" r="3.5" fill="#ff7b47" />
+            <circle cx="12" cy="-119" r="3.5" fill="#ff7b47" />
+            <ellipse cx="0" cy="-109" rx="4" ry="4.5" fill="#ff7b47" />
+          </g>
+
+          <!-- Bobbing Top Antenna & Beacon Orb -->
+          <line x1="0" y1="-142" x2="0" y2="-158" stroke="#162233" stroke-width="3" stroke-linecap="round" />
+          <circle
+            id="atlas-antenna-orb"
+            cx="0"
+            cy="-162"
+            r="6.5"
+            fill="#38e8ff"
+            stroke="#162233"
+            stroke-width="2.2"
+          />
+        </g>
+      </g>
+
+      <!-- 2. HELPER BOT "BEEP" (Center-Right Hovering Sphere-Bot w/ Holographic Sign, x = 720, y = 498) -->
+      <g id="character-beep" transform="translate(720, 498)">
+        <!-- Ground Glow Shadow -->
+        <ellipse cx="0" cy="36" rx="26" ry="5" fill="#38e8ff" opacity="0.25" />
+
+        <g id="beep-body-anim" class="bot-hover-beep">
+          <!-- Bottom Thruster Ring -->
+          <rect x="-11" y="18" width="22" height="7" rx="3.5" fill="#3b5169" stroke="#162233" stroke-width="2" />
+          <ellipse cx="0" cy="27" rx="10" ry="3.5" fill="#38e8ff" opacity="0.8" />
+
+          <!-- Cute Spherical White & Coral Body -->
+          <circle cx="0" cy="-2" r="24" fill="#f4f9ff" stroke="#162233" stroke-width="2.6" />
+          <!-- Coral Headband Stripe -->
+          <path d="M-21,-12 Q0,-18 21,-12" fill="none" stroke="#ff7b47" stroke-width="4.5" />
+
+          <!-- Expressive Digital Face Visor -->
+          <rect x="-16" y="-11" width="32" height="19" rx="8" fill="#142336" />
+          <circle cx="-7" cy="-2" r="2.8" fill="#38e8ff" />
+          <circle cx="7" cy="-2" r="2.8" fill="#38e8ff" />
+          <path
+            id="beep-mouth-arc"
+            d="M-4,3 Q0,6 4,3"
+            fill="none"
+            stroke="#38e8ff"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+
+          <!-- Top Mini Antenna -->
+          <line x1="0" y1="-26" x2="0" y2="-35" stroke="#162233" stroke-width="2.4" stroke-linecap="round" />
+          <circle cx="0" cy="-37" r="3.5" fill="#ff7b47" stroke="#162233" stroke-width="1.8" />
+
+          <!-- Right Mechanical Arm Holding Glowing Holographic Status Sign -->
+          <g id="beep-holo-sign-group" transform="translate(22, -4)">
+            <path d="M0,2 L14,-4" stroke="#162233" stroke-width="2.8" stroke-linecap="round" />
+            <!-- Emitter Wand -->
+            <rect x="12" y="-12" width="6" height="18" rx="3" fill="#ff7b47" stroke="#162233" stroke-width="2" />
+            <!-- Holographic Projection Sign Board -->
+            <rect
+              id="beep-sign-board"
+              x="16"
+              y="-36"
+              width="66"
+              height="26"
+              rx="7"
+              fill="#123847"
+              fill-opacity="0.92"
+              stroke="#38e8ff"
+              stroke-width="2.3"
+            />
+            <text
+              id="beep-sign-text"
+              x="49"
+              y="-19"
+              text-anchor="middle"
+              font-family="Fredoka, Nunito, sans-serif"
+              font-weight="700"
+              font-size="11.5"
+              letter-spacing="0.6"
+              fill="#38e8ff"
+            >
+              WHISPER
+            </text>
+          </g>
+        </g>
+      </g>
+
+      <!-- 3. DRONE BOT "BOOP" (Right Hovering Rotor Drone w/ Blueprint Tablet, x = 875, y = 415) -->
+      <g id="character-boop" transform="translate(875, 415)">
+        <g id="boop-body-anim" class="bot-hover-boop">
+          <!-- Dual Top Rotor Shafts & Spinning Blades -->
+          <line x1="-14" y1="-22" x2="-14" y2="-32" stroke="#162233" stroke-width="2.4" />
+          <line x1="14" y1="-22" x2="14" y2="-32" stroke="#162233" stroke-width="2.4" />
+          <ellipse cx="-14" cy="-33" rx="18" ry="3.2" fill="#38e8ff" stroke="#162233" stroke-width="1.5" class="drone-rotor" />
+          <ellipse cx="14" cy="-33" rx="18" ry="3.2" fill="#38e8ff" stroke="#162233" stroke-width="1.5" class="drone-rotor" />
+
+          <!-- Side Stabilizer Wings -->
+          <polygon points="-24,-6 -38,-12 -34,4 -22,4" fill="#ff7b47" stroke="#162233" stroke-width="2.2" stroke-linejoin="round" />
+          <polygon points="24,-6 38,-12 34,4 22,4" fill="#ff7b47" stroke="#162233" stroke-width="2.2" stroke-linejoin="round" />
+
+          <!-- Compact Capsule Drone Body -->
+          <rect x="-24" y="-22" width="48" height="36" rx="16" fill="#f4f9ff" stroke="#162233" stroke-width="2.5" />
+          <!-- Screen Face -->
+          <rect x="-17" y="-15" width="34" height="20" rx="8" fill="#142336" />
+          <circle cx="-7" cy="-6" r="2.6" fill="#ffd97d" />
+          <circle cx="7" cy="-6" r="2.6" fill="#ffd97d" />
+          <path d="M-4,0 Q0,3 4,0" fill="none" stroke="#ffd97d" stroke-width="2" stroke-linecap="round" />
+
+          <!-- Mini Claws Holding Holographic Blueprint Tablet -->
+          <path d="M-14,14 L-12,24" stroke="#162233" stroke-width="2.4" stroke-linecap="round" />
+          <path d="M14,14 L12,24" stroke="#162233" stroke-width="2.4" stroke-linecap="round" />
+          <rect x="-20" y="21" width="40" height="22" rx="4" fill="#13384a" stroke="#38e8ff" stroke-width="2" />
+          <line x1="-13" y1="28" x2="13" y2="28" stroke="#38e8ff" stroke-width="1.8" />
+          <line x1="-13" y1="34" x2="6" y2="34" stroke="#ff7b47" stroke-width="1.8" />
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <!-- =======================================================================
+       2. TOP BAR: LEFT CITY/SETUP PILLS & RIGHT LIVE SOUND PILL
+       ======================================================================= -->
+  <header class="relative z-20 w-full px-3 sm:px-6 pt-3 sm:pt-4 flex items-start justify-between gap-2">
+    <!-- Top-Left City Gallery & Setup Pills -->
+    <div class="flex flex-wrap items-center gap-2">
+      <button
+        id="btn-open-town"
+        type="button"
+        class="robo-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-extrabold text-ink flex items-center gap-1.5 cursor-pointer"
+        title="View completed landmarks in Future City Skyline"
+      >
+        <span class="text-base leading-none" aria-hidden="true">🏙️</span>
+        <span>Future City (<span id="town-count-badge">0</span>)</span>
+      </button>
+
+      <button
+        id="btn-open-calibrate"
+        type="button"
+        class="robo-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold text-ink/90 flex items-center gap-1.5 cursor-pointer"
+        title="Goal, Blueprints & 20s Room Calibration"
+      >
+        <svg class="w-3.5 h-3.5 text-coralEnergy" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+        </svg>
+        <span class="hidden sm:inline">Setup / Calibrate</span>
+        <span class="sm:hidden">Setup</span>
+      </button>
+    </div>
+
+    <!-- Top-Right Live Sound Pill ("Listening for: Whisper") -->
+    <div class="relative">
+      <button
+        id="btn-status-pill"
+        type="button"
+        class="robo-pill px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-2.5 text-xs sm:text-sm font-extrabold text-ink cursor-pointer hover:bg-white transition-colors"
+        title="Click to adjust voice level, microphone, or sensitivity"
+      >
+        <!-- Pulsing Mic Indicator Dot + Transient Spike Ripple -->
+        <span class="relative flex h-3 w-3 items-center justify-center shrink-0">
+          <span
+            id="mic-spike-ring"
+            class="hidden absolute inline-flex h-full w-full rounded-full bg-coralEnergy opacity-80"
+          ></span>
+          <span
+            id="mic-status-dot"
+            class="relative inline-flex rounded-full h-2.5 w-2.5 bg-coralEnergy transition-colors duration-200"
+          ></span>
+        </span>
+
+        <!-- Mini Live Audio Level Meter Bar -->
+        <span class="w-10 sm:w-14 h-2.5 rounded-full bg-[#dbe7f5] border border-ink/40 overflow-hidden relative shrink-0">
+          <span
+            id="top-pill-level-bar"
+            class="block h-full bg-[#22c55e] transition-all duration-75 rounded-full"
+            style="width: 10%;"
+          ></span>
+          <!-- Threshold Marker Tick -->
+          <span
+            id="top-pill-threshold-tick"
+            class="absolute top-0 bottom-0 w-0.5 bg-ink"
+            style="left: 42%;"
+          ></span>
+        </span>
+
+        <!-- Dynamic Status Label -->
+        <span id="status-pill-text" class="whitespace-nowrap">
+          Listening for: <span class="text-coralEnergy">Whisper</span>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <!-- =======================================================================
+       3. TOP-CENTER SPEECH BANNER PILL & CENTERED ACTION CONTROLS
+       ======================================================================= -->
+  <main class="relative z-10 flex-1 flex flex-col items-center justify-start pt-3 sm:pt-5 md:pt-7 px-4 pointer-events-none">
+    <!-- Frosted Speech Pill -->
+    <div
+      id="banner-card"
+      class="pointer-events-auto robo-pill rounded-[28px] px-6 sm:px-9 py-3 sm:py-3.5 text-center max-w-[94vw] transition-all duration-300"
+    >
+      <h1
+        id="banner-headline"
+        class="font-display text-2xl sm:text-3xl md:text-[34px] font-bold tracking-tight text-ink leading-tight"
+      >
+        Systems online... <span class="text-coralEnergy">build!</span>
+      </h1>
+      <p
+        id="banner-subtext"
+        class="text-xs sm:text-sm font-bold text-ink/75 mt-0.5"
+      >
+        Press Start and keep a gentle whisper to power the anti-gravity gantry
+      </p>
+    </div>
+
+    <!-- Centered Play/Pause & Reset Controls Directly Below Speech Pill -->
+    <div id="banner-controls-row" class="pointer-events-auto mt-3 flex items-center justify-center gap-2.5">
+      <button
+        id="btn-primary-toggle"
+        type="button"
+        class="robo-btn-cyan px-6 py-2.5 rounded-full font-display font-bold text-base sm:text-lg flex items-center gap-2 cursor-pointer"
+        aria-label="Start or Pause Quiet Timer"
+      >
+        <svg id="icon-play" class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+          <path d="M8 5.14v14l11-7-11-7z" />
+        </svg>
+        <svg id="icon-pause" class="w-5 h-5 fill-current hidden" viewBox="0 0 24 24">
+          <path d="M6 5h4v14H6V5zm8 0h4v14h-4V5z" />
+        </svg>
+        <span id="btn-primary-label">Start Building</span>
+      </button>
+
+      <button
+        id="btn-reset-session"
+        type="button"
+        class="hidden robo-btn px-4 py-2.5 rounded-full font-display font-bold text-sm sm:text-base text-ink flex items-center gap-1.5 cursor-pointer"
+        title="Reset current tower modules"
+        aria-label="Reset current tower modules"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5M5.64 18.36A9 9 0 1018.36 5.64L19 6" />
+        </svg>
+        <span>Reset</span>
+      </button>
+    </div>
+
+    <!-- Quiet Recovery Countdown Pill (Appears during the 2.0s continuous quiet window) -->
+    <div
+      id="recovery-badge"
+      class="hidden mt-2.5 pointer-events-auto bg-[#13293d]/95 border-2 border-cyberCyan text-frostedCard px-4 py-1 rounded-full text-xs sm:text-sm font-extrabold shadow-lg flex items-center gap-2"
+    >
+      <span class="inline-block w-2.5 h-2.5 rounded-full bg-cyberCyan animate-ping"></span>
+      <span>Sensors clear! Re-engaging tractor beam in <span id="recovery-countdown" class="text-cyberCyan">2.0</span>s...</span>
+    </div>
+  </main>
+
+  <!-- =======================================================================
+       4. BOTTOM-CENTER PROGRESS TRACKER & BOTTOM-RIGHT CIRCULAR CONTROL DOCK
+       ======================================================================= -->
+  <footer class="relative z-20 w-full pb-4 sm:pb-5 pt-2 px-4 sm:px-6 flex flex-col items-center justify-end">
+    <!-- Centered Ground Progress Text & Glowing Cyber-Module Slots -->
+    <div class="flex flex-col items-center max-w-full mb-12 sm:mb-1">
+      <div class="flex items-center gap-2.5 mb-2">
+        <span
+          id="progress-minutes-text"
+          class="font-display text-lg sm:text-xl md:text-2xl font-bold text-frostedCard tracking-tight drop-shadow-[0_2px_2px_rgba(12,20,34,0.85)]"
+        >
+          0 of 5 minutes
+        </span>
+        <span
+          id="blueprint-pill-tag"
+          class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#16283d]/90 border border-cyberCyan/60 text-cyberCyan shadow-xs"
+        >
+          🏙️ Starlight Eco-Tower
+        </span>
+      </div>
+
+      <!-- Horizontal Row of Glowing Futuristic Module Slots -->
+      <div
+        id="block-slots-row"
+        class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-[92vw] sm:max-w-[700px]"
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="5"
+        aria-valuenow="0"
+      >
+        <!-- Dynamically rendered cyber-module slots -->
+      </div>
+    </div>
+
+    <!-- Bottom-Right Circular Control Dock & "Done" Pill Button -->
+    <div class="w-full sm:w-auto sm:fixed sm:bottom-5 sm:right-6 flex items-center justify-center sm:justify-end gap-2.5">
+      <!-- (a) Microphone & Noise Sensitivity Button + Popover -->
+      <div class="relative">
+        <button
+          id="btn-mic-settings"
+          type="button"
+          class="robo-btn w-11 h-11 rounded-full flex items-center justify-center text-ink cursor-pointer relative"
+          title="Microphone & Noise Sensitivity Settings"
+          aria-label="Microphone and Noise Sensitivity Settings"
+        >
+          <svg id="icon-mic-on" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8" />
+          </svg>
+          <svg id="icon-mic-off" class="w-5 h-5 text-coralEnergy hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M1 1l22 22M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6M17 16.95A7 7 0 015 12v-2m14 0v2a7 7 0 01-.11 1.23M12 19v4M8 23h8" />
+          </svg>
+        </button>
+
+        <!-- Mic & Noise Sensitivity Popover Card -->
+        <div
+          id="mic-popover"
+          class="hidden absolute bottom-14 left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0 w-[315px] sm:w-[350px] robo-pill rounded-2xl p-4 shadow-2xl z-40 text-left"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-display font-bold text-base text-ink flex items-center gap-1.5">
+              <span>🎙️</span> Robo-Sensor &amp; Voice Level
+            </h3>
+            <button
+              id="btn-close-mic-popover"
+              type="button"
+              class="w-7 h-7 rounded-full hover:bg-ink/10 flex items-center justify-center text-ink/70 font-bold cursor-pointer"
+              aria-label="Close voice settings"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Voice Level Presets: Silent / Whisper / Partner -->
+          <label class="block text-xs font-extrabold uppercase tracking-wider text-ink/70 mb-1.5">
+            Target Classroom Voice
+          </label>
+          <div class="grid grid-cols-3 gap-1.5 mb-3">
+            <button
+              type="button"
+              data-voice-preset="silent"
+              class="voice-preset-btn py-2 px-2 rounded-xl border-2 text-xs font-extrabold flex flex-col items-center gap-0.5 cursor-pointer transition-all"
+            >
+              <span class="text-base">🤫</span>
+              <span>Silent</span>
+            </button>
+            <button
+              type="button"
+              data-voice-preset="whisper"
+              class="voice-preset-btn py-2 px-2 rounded-xl border-2 text-xs font-extrabold flex flex-col items-center gap-0.5 cursor-pointer transition-all"
+            >
+              <span class="text-base">🗣️</span>
+              <span>Whisper</span>
+            </button>
+            <button
+              type="button"
+              data-voice-preset="partner"
+              class="voice-preset-btn py-2 px-2 rounded-xl border-2 text-xs font-extrabold flex flex-col items-center gap-0.5 cursor-pointer transition-all"
+            >
+              <span class="text-base">👥</span>
+              <span>Partner</span>
+            </button>
+          </div>
+
+          <!-- Microphone Input Selector (populated when mic permission granted) -->
+          <div id="mic-device-selector-wrap" class="hidden mb-3">
+            <label for="select-mic-device" class="block text-[11px] font-extrabold uppercase tracking-wider text-ink/70 mb-1">
+              Microphone Input
+            </label>
+            <select
+              id="select-mic-device"
+              class="w-full rounded-xl bg-[#e6effa] border-2 border-ink/30 px-2.5 py-1.5 text-xs font-bold text-ink focus:outline-none focus:border-ink"
+            ></select>
+          </div>
+
+          <!-- Live Audio Meter & Sensitivity Threshold Slider -->
+          <div class="mb-3 bg-[#e6effa] rounded-xl p-3 border-2 border-ink/20">
+            <div class="flex items-center justify-between text-xs font-extrabold mb-1.5">
+              <span>Noise Threshold</span>
+              <span id="threshold-value-label" class="text-coralEnergy">42%</span>
+            </div>
+
+            <!-- Live Room Level Meter -->
+            <div class="w-full h-3.5 rounded-full bg-[#cbd9ec] border border-ink/40 overflow-hidden relative mb-2.5">
+              <div
+                id="popover-live-bar"
+                class="h-full bg-[#22c55e] transition-all duration-75 rounded-full"
+                style="width: 10%;"
+              ></div>
+              <div
+                id="popover-threshold-marker"
+                class="absolute top-0 bottom-0 w-1 bg-ink"
+                style="left: 42%;"
+              ></div>
+            </div>
+
+            <input
+              id="slider-threshold"
+              type="range"
+              min="10"
+              max="90"
+              value="42"
+              class="w-full"
+              aria-label="Adjust noise sensitivity threshold"
+            />
+            <div class="flex justify-between text-[10px] font-bold text-ink/65 mt-1">
+              <span>More Sensitive</span>
+              <span>Less Sensitive</span>
+            </div>
+          </div>
+
+          <!-- Simulate Room Noise Slider (For testing without speaking) -->
+          <div class="bg-[#e6effa] rounded-xl p-3 border-2 border-ink/20 mb-2.5">
+            <div class="flex items-center justify-between text-xs font-extrabold mb-1">
+              <span>🧪 Simulate Room Noise</span>
+              <button
+                id="btn-reset-sim-noise"
+                type="button"
+                class="text-[11px] underline text-coralEnergy font-extrabold cursor-pointer"
+              >
+                Use Live Mic
+              </button>
+            </div>
+            <input
+              id="slider-sim-noise"
+              type="range"
+              min="0"
+              max="100"
+              value="0"
+              class="w-full"
+              aria-label="Simulate room noise slider"
+            />
+            <p id="mic-mode-status-note" class="text-[11px] font-bold text-ink/75 mt-1">
+              Live mic activates automatically when you press Start.
+            </p>
+          </div>
+
+          <!-- Manual "Too Loud" Trigger Shortcut Hint -->
+          <div class="flex items-center justify-between text-xs font-bold text-ink/80">
+            <span>Manual Too Loud override:</span>
+            <button
+              id="btn-manual-loud-toggle"
+              type="button"
+              class="px-2.5 py-1 rounded-lg bg-ink/10 hover:bg-ink/20 font-extrabold text-ink cursor-pointer"
+            >
+              Press [P]
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- (b) Calm Synth Music Toggle Button (Shortcut: M) -->
+      <button
+        id="btn-toggle-music"
+        type="button"
+        class="robo-btn w-11 h-11 rounded-full flex items-center justify-center text-ink cursor-pointer relative"
+        title="Toggle Calm Space-Synth Music (Shortcut: M)"
+        aria-label="Toggle Calm Space-Synth Music"
+        aria-pressed="false"
+      >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
+        </svg>
+        <span
+          id="music-active-dot"
+          class="hidden absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-cyberCyan border-2 border-ink"
+        ></span>
+      </button>
+
+      <!-- (c) Blueprint & Room Setup Modal Button -->
+      <button
+        id="btn-open-settings"
+        type="button"
+        class="robo-btn w-11 h-11 rounded-full flex items-center justify-center text-ink cursor-pointer"
+        title="Blueprint & Room Setup"
+        aria-label="Blueprint and Room Setup"
+      >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      </button>
+
+      <!-- (d) Done Pill Button -->
+      <button
+        id="btn-done-session"
+        type="button"
+        class="robo-btn-navy px-5 py-2.5 rounded-full font-display font-bold text-sm sm:text-base tracking-wide cursor-pointer"
+      >
+        Done
+      </button>
+    </div>
+  </footer>
+
+  <!-- =======================================================================
+       5. MODAL: BLUEPRINT & 20-SECOND ROOM CALIBRATION SETUP
+       ======================================================================= -->
+  <div
+    id="modal-settings"
+    class="hidden fixed inset-0 z-50 bg-ink/60 backdrop-blur-[3px] flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-settings-title"
+  >
+    <div class="robo-pill rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b-2 border-ink/20 flex items-center justify-between bg-[#e6effa]">
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl" aria-hidden="true">🤖</span>
+          <h2 id="modal-settings-title" class="font-display font-bold text-xl text-ink">
+            RoboCity Blueprints &amp; Room Setup
+          </h2>
+        </div>
+        <button
+          id="btn-close-settings"
+          type="button"
+          class="robo-btn w-9 h-9 rounded-full flex items-center justify-center font-extrabold text-ink cursor-pointer"
+          aria-label="Close setup modal"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Modal Scrollable Content -->
+      <div class="p-6 overflow-y-auto custom-scroll space-y-6">
+        <!-- Section 1: Quiet Work Duration (1 to 30 minutes) -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label for="slider-goal-minutes" class="font-display font-bold text-base text-ink">
+              1. Quiet Work Duration
+            </label>
+            <span id="goal-minutes-display" class="px-3 py-0.5 rounded-full bg-coralEnergy text-white font-display font-bold text-sm border border-ink">
+              5 minutes
+            </span>
+          </div>
+          <input
+            id="slider-goal-minutes"
+            type="range"
+            min="1"
+            max="30"
+            value="5"
+            class="w-full mb-2.5"
+          />
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" data-goal-preset="3" class="goal-preset-chip robo-btn px-3 py-1 rounded-full text-xs font-extrabold cursor-pointer">3 min</button>
+            <button type="button" data-goal-preset="5" class="goal-preset-chip robo-btn px-3 py-1 rounded-full text-xs font-extrabold cursor-pointer">5 min</button>
+            <button type="button" data-goal-preset="10" class="goal-preset-chip robo-btn px-3 py-1 rounded-full text-xs font-extrabold cursor-pointer">10 min</button>
+            <button type="button" data-goal-preset="15" class="goal-preset-chip robo-btn px-3 py-1 rounded-full text-xs font-extrabold cursor-pointer">15 min</button>
+            <button type="button" data-goal-preset="20" class="goal-preset-chip robo-btn px-3 py-1 rounded-full text-xs font-extrabold cursor-pointer">20 min</button>
+            <button type="button" data-goal-preset="30" class="goal-preset-chip robo-btn px-3 py-1 rounded-full text-xs font-extrabold cursor-pointer">30 min</button>
+          </div>
+        </div>
+
+        <!-- Section 2: Choose Futuristic Building Blueprint -->
+        <div>
+          <h3 class="font-display font-bold text-base text-ink mb-2">
+            2. Choose Futuristic Landmark Blueprint
+          </h3>
+          <div id="blueprint-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <!-- 5 futuristic blueprints populated by JS -->
+          </div>
+        </div>
+
+        <!-- Section 3: 20-Second Guided Room Calibration -->
+        <div class="bg-[#e6effa] rounded-2xl p-4 border-2 border-ink/25">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+            <div>
+              <h3 class="font-display font-bold text-base text-ink flex items-center gap-1.5">
+                <span>📡</span> Calibrate Robo-Sensors (20s)
+              </h3>
+              <p class="text-xs font-bold text-ink/75">
+                Samples 10s of room silence + 10s of your target voice to auto-tune the quiet threshold.
+              </p>
+            </div>
+            <button
+              id="btn-start-calibration"
+              type="button"
+              class="robo-btn-cyan px-4 py-2 rounded-full font-display font-bold text-xs sm:text-sm shrink-0 cursor-pointer"
+            >
+              Start 20s Calibration
+            </button>
+          </div>
+
+          <!-- Active Calibration Progress Panel -->
+          <div id="calibration-panel" class="hidden mt-3 pt-3 border-t border-ink/20">
+            <div class="flex items-center justify-between text-xs font-extrabold mb-1">
+              <span id="calibration-step-label" class="text-coralEnergy">Step 1/2: Total Room Silence...</span>
+              <span id="calibration-timer-label">10s</span>
+            </div>
+            <div class="w-full h-3 rounded-full bg-[#cbd9ec] border border-ink/30 overflow-hidden mb-2">
+              <div
+                id="calibration-progress-bar"
+                class="h-full bg-cyberCyan transition-all duration-100 rounded-full"
+                style="width: 0%;"
+              ></div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span id="calibration-live-reading" class="text-[11px] font-bold text-ink/75">
+                Sampling baseline noise...
+              </span>
+              <button
+                id="btn-cancel-calibration"
+                type="button"
+                class="text-xs font-extrabold underline text-ink/70 hover:text-ink cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Teacher Options & Future City Shortcut -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label class="flex items-center justify-between bg-[#e6effa] px-4 py-3 rounded-2xl border-2 border-ink/20 cursor-pointer">
+            <div>
+              <span class="block text-xs font-extrabold text-ink">No-Mic Manual Mode</span>
+              <span class="block text-[11px] font-bold text-ink/70">Use [P] key instead of mic</span>
+            </div>
+            <input id="checkbox-manual-mode" type="checkbox" class="w-5 h-5 accent-[#ff7b47] rounded cursor-pointer" />
+          </label>
+
+          <label class="flex items-center justify-between bg-[#e6effa] px-4 py-3 rounded-2xl border-2 border-ink/20 cursor-pointer">
+            <div>
+              <span class="block text-xs font-extrabold text-ink">Quick Demo Speed (6s/min)</span>
+              <span class="block text-[11px] font-bold text-ink/70">Preview full tower in 30s</span>
+            </div>
+            <input id="checkbox-demo-speed" type="checkbox" class="w-5 h-5 accent-[#ff7b47] rounded cursor-pointer" />
+          </label>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3.5 border-t-2 border-ink/20 bg-[#e6effa] flex items-center justify-between gap-2">
+        <button
+          id="btn-settings-open-skyline"
+          type="button"
+          class="robo-btn px-4 py-2 rounded-full font-display font-bold text-xs sm:text-sm cursor-pointer"
+        >
+          🏙️ Open Future City Skyline
+        </button>
+        <button
+          id="btn-apply-settings"
+          type="button"
+          class="robo-btn-navy px-6 py-2 rounded-full font-display font-bold text-sm cursor-pointer"
+        >
+          Save &amp; Return to Site
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       6. MODAL: SESSION SUMMARY CELEBRATION CARD ("Done")
+       ======================================================================= -->
+  <div
+    id="modal-summary"
+    class="hidden fixed inset-0 z-50 bg-ink/65 backdrop-blur-[3px] flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="summary-title"
+  >
+    <div class="robo-pill rounded-3xl w-full max-w-md p-6 text-center relative overflow-hidden">
+      <div class="text-4xl mb-1" aria-hidden="true">🎆🤖🏙️</div>
+      <h2 id="summary-title" class="font-display font-bold text-2xl sm:text-3xl text-ink">
+        City Sector Complete!
+      </h2>
+      <p id="summary-subtitle" class="text-xs sm:text-sm font-bold text-ink/75 mt-1 mb-4">
+        Your Starlight Eco-Tower has been added to the Future City Skyline!
+      </p>
+
+      <!-- Mini Preview of Completed Sci-Fi Building -->
+      <div class="mx-auto w-48 h-36 rounded-2xl bg-[#182e46] border-2 border-ink flex items-center justify-center mb-4 p-2 shadow-inner">
+        <svg id="summary-building-svg" viewBox="-100 -150 200 158" class="w-full h-full"></svg>
+      </div>
+
+      <!-- 3 Key Classroom Metrics -->
+      <div class="grid grid-cols-3 gap-2.5 mb-5">
+        <div class="bg-[#e6effa] rounded-2xl p-3 border-2 border-ink/20">
+          <div id="stat-focus-time" class="font-display font-bold text-lg sm:text-xl text-coralEnergy">0m 00s</div>
+          <div class="text-[11px] font-extrabold text-ink/75 leading-tight mt-0.5">Minutes of Focus</div>
+        </div>
+        <div class="bg-[#e6effa] rounded-2xl p-3 border-2 border-ink/20">
+          <div id="stat-waits-count" class="font-display font-bold text-lg sm:text-xl text-ink">0</div>
+          <div class="text-[11px] font-extrabold text-ink/75 leading-tight mt-0.5">Noise Pauses</div>
+        </div>
+        <div class="bg-[#e6effa] rounded-2xl p-3 border-2 border-ink/20">
+          <div id="stat-longest-stretch" class="font-display font-bold text-lg sm:text-xl text-[#0ea5e9]">0m 00s</div>
+          <div class="text-[11px] font-extrabold text-ink/75 leading-tight mt-0.5">Longest Stretch</div>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-2.5">
+        <button
+          id="btn-summary-view-town"
+          type="button"
+          class="w-full sm:w-auto robo-btn px-5 py-2.5 rounded-full font-display font-bold text-sm cursor-pointer"
+        >
+          🏙️ View Future City
+        </button>
+        <button
+          id="btn-summary-new-build"
+          type="button"
+          class="w-full sm:w-auto robo-btn-cyan px-6 py-2.5 rounded-full font-display font-bold text-sm cursor-pointer"
+        >
+          Build Next Tower
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       7. MODAL: PERSISTENT FUTURE CITY SKYLINE GALLERY
+       ======================================================================= -->
+  <div
+    id="modal-town"
+    class="hidden fixed inset-0 z-50 bg-ink/65 backdrop-blur-[3px] flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="town-modal-title"
+  >
+    <div class="robo-pill rounded-3xl w-full max-w-2xl max-h-[88vh] flex flex-col overflow-hidden">
+      <div class="px-6 py-4 border-b-2 border-ink/20 bg-[#e6effa] flex items-center justify-between">
+        <div>
+          <h2 id="town-modal-title" class="font-display font-bold text-xl sm:text-2xl text-ink flex items-center gap-2">
+            <span>🏙️</span> Future City Skyline
+          </h2>
+          <p id="town-stats-sub" class="text-xs font-bold text-ink/75">
+            Every quiet work session adds a futuristic landmark to your classroom metropolis!
+          </p>
+        </div>
+        <button
+          id="btn-close-town"
+          type="button"
+          class="robo-btn w-9 h-9 rounded-full flex items-center justify-center font-extrabold text-ink cursor-pointer"
+          aria-label="Close Future City Skyline"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div id="town-gallery-body" class="p-6 overflow-y-auto custom-scroll flex-1">
+        <!-- Saved futuristic landmarks rendered dynamically -->
+      </div>
+
+      <div class="px-6 py-3.5 border-t-2 border-ink/20 bg-[#e6effa] flex items-center justify-between">
+        <div id="town-clear-controls">
+          <button
+            id="btn-town-clear-ask"
+            type="button"
+            class="text-xs font-extrabold text-ink/60 hover:text-coralEnergy underline cursor-pointer"
+          >
+            Reset Future City
+          </button>
+          <span id="town-clear-confirm-group" class="hidden inline-flex items-center gap-2 text-xs font-extrabold">
+            <span class="text-coralEnergy">Clear all saved landmarks?</span>
+            <button id="btn-town-clear-yes" type="button" class="px-2.5 py-1 rounded-full bg-coralEnergy text-white border border-ink cursor-pointer">Yes, Clear</button>
+            <button id="btn-town-clear-no" type="button" class="px-2.5 py-1 rounded-full bg-ink/15 text-ink cursor-pointer">Cancel</button>
+          </span>
+        </div>
+
+        <button
+          id="btn-town-done"
+          type="button"
+          class="robo-btn-navy px-5 py-2 rounded-full font-display font-bold text-sm cursor-pointer"
+        >
+          Back to Gantry
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       8. NON-INTRUSIVE TOAST NOTIFICATION
+       ======================================================================= -->
+  <div
+    id="toast-banner"
+    class="pointer-events-none fixed top-16 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-300 transform -translate-y-2"
+  >
+    <div class="bg-ink text-frostedCard px-4 py-2 rounded-full text-xs sm:text-sm font-extrabold shadow-xl border-2 border-cyberCyan">
+      <span id="toast-text">Notification</span>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       9. APPLICATION JAVASCRIPT ENGINE
+       ======================================================================= -->
+  <script>
+    (function () {
+      'use strict';
+
+      // Optional query param for fast demos (?minuteMs=5000)
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryMinuteMs = parseInt(urlParams.get('minuteMs'), 10);
+
+      // =====================================================================
+      // A. VOICE LEVELS & 5 PROGRESSIVE FUTURISTIC BUILDING BLUEPRINTS
+      // =====================================================================
+      const VOICE_LEVELS = {
+        silent: {
+          id: 'silent',
+          label: 'Silent',
+          threshold: 24,
+          prompt: 'Zero-decibel focus mode — library silence',
+          holoShort: 'SILENT',
+        },
+        whisper: {
+          id: 'whisper',
+          label: 'Whisper',
+          threshold: 42,
+          prompt: 'Keep a gentle whisper to power the anti-gravity gantry',
+          holoShort: 'WHISPER',
+        },
+        partner: {
+          id: 'partner',
+          label: 'Partner',
+          threshold: 62,
+          prompt: 'Low indoor partner voices keep the robots building',
+          holoShort: 'PARTNER',
+        },
+      };
+
+      const BLUEPRINTS = {
+        ecotower: {
+          id: 'ecotower',
+          name: 'Starlight Eco-Tower',
+          icon: '🏙️',
+          blockColor: '#38e8ff',
+          render(ratio) {
+            let svg = '';
+            // Module 1 (>0): Foundation Airlock & Brushed Steel Lobby
+            if (ratio > 0) {
+              const h1 = Math.min(1, ratio / 0.22) * 34;
+              svg += `<rect x="-66" y="${-h1}" width="132" height="${h1}" rx="5" fill="#e8f3ff" stroke="#162233" stroke-width="2.4" />`;
+              if (ratio >= 0.14) {
+                svg += `<rect x="-18" y="-26" width="36" height="26" rx="12" fill="#1b3954" stroke="#162233" stroke-width="2.2" />`;
+                svg += `<line x1="0" y1="-26" x2="0" y2="0" stroke="#38e8ff" stroke-width="2" />`;
+                svg += `<rect x="-52" y="-22" width="22" height="12" rx="3" fill="#38e8ff" stroke="#162233" stroke-width="1.8" />`;
+                svg += `<rect x="30" y="-22" width="22" height="12" rx="3" fill="#38e8ff" stroke="#162233" stroke-width="1.8" />`;
+              }
+            }
+            // Module 2 (>=0.28): Neon Habitat Deck
+            if (ratio >= 0.28) {
+              svg += `<rect x="-56" y="-62" width="112" height="28" rx="4" fill="#d3e6fa" stroke="#162233" stroke-width="2.4" />`;
+              svg += `<rect x="-46" y="-54" width="92" height="11" rx="4" fill="#162233" />`;
+              svg += `<rect x="-42" y="-51" width="84" height="5" rx="2.5" fill="#ff7b47" />`;
+            }
+            // Module 3 (>=0.50): Hydro-Garden Pod
+            if (ratio >= 0.50) {
+              svg += `<rect x="-48" y="-90" width="96" height="28" rx="8" fill="#89e8c2" stroke="#162233" stroke-width="2.4" />`;
+              svg += `<circle cx="-22" cy="-76" r="7" fill="#34d399" stroke="#162233" stroke-width="1.8" />`;
+              svg += `<circle cx="0" cy="-78" r="8" fill="#10b981" stroke="#162233" stroke-width="1.8" />`;
+              svg += `<circle cx="22" cy="-76" r="7" fill="#34d399" stroke="#162233" stroke-width="1.8" />`;
+            }
+            // Module 4 (>=0.74): Panoramic Glass Atrium
+            if (ratio >= 0.74) {
+              svg += `<path d="M-38,-90 L-28,-116 L28,-116 L38,-90 Z" fill="#6df0ff" stroke="#162233" stroke-width="2.4" stroke-linejoin="round" />`;
+              svg += `<line x1="-12" y1="-116" x2="-16" y2="-90" stroke="#162233" stroke-width="1.8" />`;
+              svg += `<line x1="12" y1="-116" x2="16" y2="-90" stroke="#162233" stroke-width="1.8" />`;
+            }
+            // Module 5 (>=0.999): Star-Beacon Spire
+            if (ratio >= 0.999) {
+              svg += `<line x1="0" y1="-116" x2="0" y2="-142" stroke="#162233" stroke-width="3" stroke-linecap="round" />`;
+              svg += `<circle cx="0" cy="-144" r="6" fill="#ff7b47" stroke="#162233" stroke-width="2" />`;
+              svg += `<circle cx="0" cy="-144" r="11" fill="#ff7b47" opacity="0.28" />`;
+            }
+            return svg;
+          },
+        },
+
+        spaceport: {
+          id: 'spaceport',
+          name: 'Orbital Spaceport',
+          icon: '🚀',
+          blockColor: '#ff7b47',
+          render(ratio) {
+            let svg = '';
+            // Module 1 (>0): Blast-Shield Base
+            if (ratio > 0) {
+              svg += `<polygon points="-74,0 -58,-30 58,-30 74,0" fill="#465c75" stroke="#162233" stroke-width="2.4" stroke-linejoin="round" />`;
+              svg += `<rect x="-36" y="-22" width="72" height="12" rx="3" fill="#ff7b47" stroke="#162233" stroke-width="1.8" />`;
+            }
+            // Module 2 (>=0.28): Plasma Fuel Core
+            if (ratio >= 0.28) {
+              svg += `<rect x="-42" y="-62" width="84" height="32" rx="5" fill="#f4f9ff" stroke="#162233" stroke-width="2.4" />`;
+              svg += `<rect x="-14" y="-56" width="28" height="20" rx="6" fill="#162233" />`;
+              svg += `<circle cx="0" cy="-46" r="6.5" fill="#38e8ff" />`;
+            }
+            // Module 3 (>=0.52): Comms Radar Deck
+            if (ratio >= 0.52) {
+              svg += `<rect x="-54" y="-82" width="108" height="20" rx="6" fill="#31465c" stroke="#162233" stroke-width="2.3" />`;
+              svg += `<line x1="-64" y1="-72" x2="-54" y2="-72" stroke="#162233" stroke-width="2.5" />`;
+              svg += `<circle cx="-68" cy="-72" r="5" fill="#38e8ff" stroke="#162233" stroke-width="1.8" />`;
+              svg += `<line x1="64" y1="-72" x2="54" y2="-72" stroke="#162233" stroke-width="2.5" />`;
+              svg += `<circle cx="68" cy="-72" r="5" fill="#38e8ff" stroke="#162233" stroke-width="1.8" />`;
+            }
+            // Module 4 (>=0.75): Orbital Docking Ring
+            if (ratio >= 0.75) {
+              svg += `<rect x="-26" y="-110" width="52" height="28" rx="4" fill="#e8f3ff" stroke="#162233" stroke-width="2.3" />`;
+              svg += `<ellipse cx="0" cy="-96" rx="38" ry="6" fill="none" stroke="#ff7b47" stroke-width="3.5" />`;
+            }
+            // Module 5 (>=0.999): Mini Rocket Nosecone
+            if (ratio >= 0.999) {
+              svg += `<path d="M-22,-110 C-22,-132 0,-145 0,-145 C0,-145 22,-132 22,-110 Z" fill="#ff7b47" stroke="#162233" stroke-width="2.5" stroke-linejoin="round" />`;
+              svg += `<circle cx="0" cy="-124" r="5" fill="#38e8ff" stroke="#162233" stroke-width="1.6" />`;
+            }
+            return svg;
+          },
+        },
+
+        biolab: {
+          id: 'biolab',
+          name: 'Cyber-Dome Bio-Lab',
+          icon: '🔬',
+          blockColor: '#4ade80',
+          render(ratio) {
+            let svg = '';
+            // Module 1 (>0): Reinforced Lab Base
+            if (ratio > 0) {
+              svg += `<rect x="-70" y="-30" width="140" height="30" rx="5" fill="#e8f3ff" stroke="#162233" stroke-width="2.4" />`;
+              svg += `<rect x="-54" y="-22" width="108" height="12" rx="4" fill="#1d3954" stroke="#162233" stroke-width="1.8" />`;
+              svg += `<circle cx="-32" cy="-16" r="3.5" fill="#4ade80" />`;
+              svg += `<circle cx="0" cy="-16" r="3.5" fill="#38e8ff" />`;
+              svg += `<circle cx="32" cy="-16" r="3.5" fill="#4ade80" />`;
+            }
+            // Module 2 (>=0.30): Glowing Bio-Rings
+            if (ratio >= 0.30) {
+              svg += `<rect x="-56" y="-56" width="112" height="26" rx="6" fill="#2a5870" stroke="#162233" stroke-width="2.3" />`;
+              svg += `<line x1="-56" y1="-43" x2="56" y2="-43" stroke="#4ade80" stroke-width="3.5" />`;
+            }
+            // Module 3 (>=0.54): Solar-Wing Module
+            if (ratio >= 0.54) {
+              svg += `<rect x="-86" y="-74" width="172" height="12" rx="4" fill="#38e8ff" stroke="#162233" stroke-width="2.2" />`;
+              svg += `<rect x="-46" y="-80" width="92" height="24" rx="5" fill="#f4f9ff" stroke="#162233" stroke-width="2.3" />`;
+            }
+            // Module 4 (>=0.78): Geodesic Conservatory Dome
+            if (ratio >= 0.78) {
+              svg += `<path d="M-42,-80 A42,38 0 0,1 42,-80 Z" fill="#86efac" fill-opacity="0.88" stroke="#162233" stroke-width="2.4" />`;
+              svg += `<path d="M-20,-80 A20,38 0 0,1 20,-80" fill="none" stroke="#162233" stroke-width="1.6" />`;
+              svg += `<line x1="-36" y1="-98" x2="36" y2="-98" stroke="#162233" stroke-width="1.6" />`;
+            }
+            // Module 5 (>=0.999): Atmospheric Sensor Spire
+            if (ratio >= 0.999) {
+              svg += `<line x1="0" y1="-118" x2="0" y2="-142" stroke="#162233" stroke-width="2.8" stroke-linecap="round" />`;
+              svg += `<circle cx="0" cy="-143" r="5.5" fill="#38e8ff" stroke="#162233" stroke-width="2" />`;
+            }
+            return svg;
+          },
+        },
+
+        maglev: {
+          id: 'maglev',
+          name: 'Quantum Mag-Lev Hub',
+          icon: '🚄',
+          blockColor: '#60a5fa',
+          render(ratio) {
+            let svg = '';
+            // Module 1 (>0): Kinetic Pylons
+            if (ratio > 0) {
+              svg += `<rect x="-68" y="-34" width="28" height="34" rx="4" fill="#3b5169" stroke="#162233" stroke-width="2.4" />`;
+              svg += `<rect x="40" y="-34" width="28" height="34" rx="4" fill="#3b5169" stroke="#162233" stroke-width="2.4" />`;
+              svg += `<rect x="-40" y="-14" width="80" height="14" fill="#1d3954" stroke="#162233" stroke-width="2" />`;
+            }
+            // Module 2 (>=0.28): Fusion Reactor Core
+            if (ratio >= 0.28) {
+              svg += `<rect x="-32" y="-58" width="64" height="44" rx="8" fill="#f4f9ff" stroke="#162233" stroke-width="2.4" />`;
+              svg += `<circle cx="0" cy="-36" r="13" fill="#162233" />`;
+              svg += `<circle cx="0" cy="-36" r="7" fill="#38e8ff" />`;
+            }
+            // Module 3 (>=0.54): Sky-Bridge Concourse
+            if (ratio >= 0.54) {
+              svg += `<rect x="-82" y="-82" width="164" height="24" rx="10" fill="#e8f3ff" stroke="#162233" stroke-width="2.4" />`;
+              svg += `<rect x="-70" y="-75" width="140" height="9" rx="4.5" fill="#38e8ff" stroke="#162233" stroke-width="1.6" />`;
+            }
+            // Module 4 (>=0.78): Traffic Control Deck
+            if (ratio >= 0.78) {
+              svg += `<polygon points="-44,-82 -34,-108 34,-108 44,-82" fill="#ff7b47" stroke="#162233" stroke-width="2.4" stroke-linejoin="round" />`;
+              svg += `<rect x="-26" y="-101" width="52" height="10" rx="3" fill="#162233" />`;
+            }
+            // Module 5 (>=0.999): Twin Quantum Antennae
+            if (ratio >= 0.999) {
+              svg += `<line x1="-18" y1="-108" x2="-18" y2="-138" stroke="#162233" stroke-width="2.8" stroke-linecap="round" />`;
+              svg += `<line x1="18" y1="-108" x2="18" y2="-138" stroke="#162233" stroke-width="2.8" stroke-linecap="round" />`;
+              svg += `<circle cx="-18" cy="-140" r="4.5" fill="#38e8ff" stroke="#162233" stroke-width="1.8" />`;
+              svg += `<circle cx="18" cy="-140" r="4.5" fill="#38e8ff" stroke="#162233" stroke-width="1.8" />`;
+            }
+            return svg;
+          },
+        },
+
+        citadel: {
+          id: 'citadel',
+          name: 'Solarpunk Citadel',
+          icon: '☀️',
+          blockColor: '#fbbf24',
+          render(ratio) {
+            let svg = '';
+            // Module 1 (>0): Arcology Base
+            if (ratio > 0) {
+              svg += `<path d="M-74,0 L-62,-32 L62,-32 L74,0 Z" fill="#f4f9ff" stroke="#162233" stroke-width="2.4" stroke-linejoin="round" />`;
+              svg += `<rect x="-16" y="-26" width="32" height="26" rx="14" fill="#fbbf24" stroke="#162233" stroke-width="2.2" />`;
+            }
+            // Module 2 (>=0.28): Golden Light-Bridge Tier
+            if (ratio >= 0.28) {
+              svg += `<rect x="-54" y="-58" width="108" height="26" rx="5" fill="#e8f3ff" stroke="#162233" stroke-width="2.4" />`;
+              svg += `<rect x="-44" y="-50" width="88" height="10" rx="4" fill="#fbbf24" stroke="#162233" stroke-width="1.6" />`;
+            }
+            // Module 3 (>=0.54): Suspended Ring-Turbine
+            if (ratio >= 0.54) {
+              svg += `<rect x="-36" y="-86" width="72" height="28" rx="6" fill="#31465c" stroke="#162233" stroke-width="2.3" />`;
+              svg += `<ellipse cx="0" cy="-72" rx="54" ry="8" fill="none" stroke="#38e8ff" stroke-width="3.5" />`;
+            }
+            // Module 4 (>=0.78): Crystal Conservatory
+            if (ratio >= 0.78) {
+              svg += `<polygon points="0,-122 -32,-86 32,-86" fill="#fde68a" stroke="#162233" stroke-width="2.4" stroke-linejoin="round" />`;
+              svg += `<line x1="0" y1="-122" x2="0" y2="-86" stroke="#162233" stroke-width="1.8" />`;
+            }
+            // Module 5 (>=0.999): Sun-Spire Finial
+            if (ratio >= 0.999) {
+              svg += `<line x1="0" y1="-122" x2="0" y2="-142" stroke="#162233" stroke-width="2.8" stroke-linecap="round" />`;
+              svg += `<circle cx="0" cy="-144" r="6.5" fill="#fbbf24" stroke="#162233" stroke-width="2" />`;
+            }
+            return svg;
+          },
+        },
+      };
+
+      // =====================================================================
+      // B. APPLICATION STATE
+      // =====================================================================
+      const STORAGE_KEY = 'robocity_builders_skyline_v1';
+
+      const state = {
+        status: 'idle', // 'idle' | 'running' | 'paused' | 'waiting_quiet' | 'completed'
+        voiceLevel: 'whisper', // 'silent' | 'whisper' | 'partner'
+        threshold: 42, // 10..90
+        goalMinutes: 5, // 1..30
+        minuteDurationMs: queryMinuteMs > 500 ? queryMinuteMs : 60000,
+        blueprintId: 'ecotower',
+
+        // Timer & Session Metrics
+        completedMinutes: 0,
+        currentMinuteElapsedMs: 0,
+        totalFocusMs: 0,
+        currentStretchMs: 0,
+        longestStretchMs: 0,
+        waitCount: 0,
+
+        // Sky Monorail Animation State
+        monorailX: 220,
+
+        // Audio & Hysteresis Timers
+        liveAudioLevel: 0,
+        smoothedRms: 0,
+        simulatedNoise: 0,
+        manualNoMicMode: false,
+        manualLoudForced: false,
+        aboveThresholdDurationMs: 0,
+        belowThresholdDurationMs: 0,
+        lastSpikeRippleAt: 0,
+
+        // Music
+        musicEnabled: false,
+
+        // Calibration
+        calibrating: false,
+        calibrationElapsedMs: 0,
+        silenceSamples: [],
+        voiceSamples: [],
+
+        // Persistent Future City Skyline
+        town: [],
+      };
+
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) state.town = parsed;
+        }
+      } catch (e) {
+        // Ignore storage restrictions
+      }
+
+      function saveTownToStorage() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state.town));
+        } catch (e) {
+          // Ignore storage restrictions
+        }
+      }
+
+      // =====================================================================
+      // C. WEB AUDIO API ENGINE (MIC ANALYSER + SPACE-SYNTH PADS + CHIMES)
+      // =====================================================================
+      const AudioEngine = {
+        ctx: null,
+        analyser: null,
+        micStream: null,
+        sourceNode: null,
+        timeData: null,
+        micReady: false,
+        micDenied: false,
+        selectedDeviceId: '',
+
+        // Calm Space-Synth Music Nodes
+        musicMasterGain: null,
+        musicInterval: null,
+        chordStep: 0,
+
+        ensureContext() {
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+              this.ctx = new AudioCtx();
+            }
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+          return this.ctx;
+        },
+
+        async initMicrophone(deviceId = '') {
+          if (state.manualNoMicMode) return false;
+          if (this.micReady && this.analyser && !deviceId) return true;
+
+          const ctx = this.ensureContext();
+          if (!ctx || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            this.micDenied = true;
+            return false;
+          }
+
+          try {
+            // Stop previous stream if switching audio inputs
+            if (this.micStream) {
+              this.micStream.getTracks().forEach((t) => t.stop());
+            }
+
+            const audioConstraints = {
+              echoCancellation: true,
+              noiseSuppression: false,
+              autoGainControl: false,
+            };
+            if (deviceId) {
+              audioConstraints.deviceId = { exact: deviceId };
+            }
+
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
+            this.micStream = stream;
+            this.sourceNode = ctx.createMediaStreamSource(stream);
+            this.analyser = ctx.createAnalyser();
+            this.analyser.fftSize = 512;
+            this.analyser.smoothingTimeConstant = 0.65;
+            this.sourceNode.connect(this.analyser);
+            this.timeData = new Float32Array(this.analyser.fftSize);
+            this.micReady = true;
+            this.micDenied = false;
+
+            await this.populateAudioInputs();
+            return true;
+          } catch (err) {
+            this.micDenied = true;
+            this.micReady = false;
+            return false;
+          }
+        },
+
+        async populateAudioInputs() {
+          if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+          try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const inputs = devices.filter((d) => d.kind === 'audioinput');
+            const selectEl = document.getElementById('select-mic-device');
+            const wrapEl = document.getElementById('mic-device-selector-wrap');
+            if (!selectEl || !wrapEl || inputs.length === 0) return;
+
+            selectEl.innerHTML = inputs
+              .map(
+                (dev, i) =>
+                  `<option value="${dev.deviceId}" ${dev.deviceId === this.selectedDeviceId ? 'selected' : ''}>${
+                    dev.label || `Classroom Microphone ${i + 1}`
+                  }</option>`
+              )
+              .join('');
+            wrapEl.classList.remove('hidden');
+          } catch (e) {
+            // Ignore enumerateDevices errors
+          }
+        },
+
+        readNormalizedLevel() {
+          if (state.simulatedNoise > 0) {
+            return state.simulatedNoise;
+          }
+          if (state.manualLoudForced) {
+            return Math.min(100, state.threshold + 22);
+          }
+          if (!this.micReady || !this.analyser || !this.timeData) {
+            return 0;
+          }
+          this.analyser.getFloatTimeDomainData(this.timeData);
+          let sumSquares = 0;
+          for (let i = 0; i < this.timeData.length; i++) {
+            const sample = this.timeData[i];
+            sumSquares += sample * sample;
+          }
+          const rms = Math.sqrt(sumSquares / this.timeData.length);
+          const mapped = Math.min(100, Math.max(0, Math.pow(rms * 3.8, 0.62) * 100));
+          state.smoothedRms = state.smoothedRms * 0.68 + mapped * 0.32;
+          return Math.round(state.smoothedRms);
+        },
+
+        // Futuristic Crystal-Bell Lock-In Chime
+        playModuleLockChime() {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          const notes = [587.33, 880.0]; // D5 -> A5 futuristic chime
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+            gain.gain.setValueAtTime(0.001, now + idx * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.11, now + idx * 0.1 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0008, now + idx * 0.1 + 0.48);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.1);
+            osc.stop(now + idx * 0.1 + 0.52);
+          });
+        },
+
+        // Sci-Fi Victory Arpeggio on Complete Tower
+        playCelebrationFanfare() {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5]; // C5 E5 G5 C6 E6
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.11);
+            gain.gain.setValueAtTime(0.001, now + idx * 0.11);
+            gain.gain.exponentialRampToValueAtTime(0.11, now + idx * 0.11 + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.0008, now + idx * 0.11 + 0.72);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.11);
+            osc.stop(now + idx * 0.11 + 0.76);
+          });
+        },
+
+        // Gentle Ambient Space-Synth Focus Pads (Auto-ducks when loud)
+        startCalmMusic() {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          if (!this.musicMasterGain) {
+            this.musicMasterGain = ctx.createGain();
+            this.musicMasterGain.gain.setValueAtTime(0.08, ctx.currentTime);
+            this.musicMasterGain.connect(ctx.destination);
+          }
+          if (this.musicInterval) clearInterval(this.musicInterval);
+
+          const chords = [
+            [261.63, 329.63, 392.0, 493.88], // Cmaj7
+            [293.66, 349.23, 440.0, 523.25], // Dm7
+            [220.0, 261.63, 329.63, 493.88], // Am9
+            [196.0, 293.66, 349.23, 440.0],  // Gsus4add9
+          ];
+
+          const playSpacePad = () => {
+            if (!state.musicEnabled || !this.ctx) return;
+            const now = this.ctx.currentTime;
+            const chord = chords[this.chordStep % chords.length];
+            this.chordStep++;
+
+            chord.forEach((freq, i) => {
+              const osc = this.ctx.createOscillator();
+              const noteGain = this.ctx.createGain();
+              osc.type = i % 2 === 0 ? 'sine' : 'triangle';
+              osc.frequency.setValueAtTime(freq, now);
+
+              noteGain.gain.setValueAtTime(0.0005, now);
+              noteGain.gain.linearRampToValueAtTime(0.16 / chord.length, now + 0.9);
+              noteGain.gain.linearRampToValueAtTime(0.0005, now + 3.9);
+
+              osc.connect(noteGain);
+              noteGain.connect(this.musicMasterGain);
+              osc.start(now);
+              osc.stop(now + 4.0);
+            });
+          };
+
+          playSpacePad();
+          this.musicInterval = setInterval(playSpacePad, 3700);
+        },
+
+        stopCalmMusic() {
+          if (this.musicInterval) {
+            clearInterval(this.musicInterval);
+            this.musicInterval = null;
+          }
+        },
+
+        updateMusicDucking(isLoud) {
+          if (!this.ctx || !this.musicMasterGain) return;
+          const targetGain = !state.musicEnabled ? 0.0001 : isLoud ? 0.012 : 0.085;
+          this.musicMasterGain.gain.setTargetAtTime(targetGain, this.ctx.currentTime, 0.25);
+        },
+      };
+
+      // =====================================================================
+      // D. DOM ELEMENT REFERENCES
+      // =====================================================================
+      const els = {
+        // Top Bar
+        btnOpenTown: document.getElementById('btn-open-town'),
+        townCountBadge: document.getElementById('town-count-badge'),
+        btnOpenCalibrate: document.getElementById('btn-open-calibrate'),
+        btnStatusPill: document.getElementById('btn-status-pill'),
+        micSpikeRing: document.getElementById('mic-spike-ring'),
+        micStatusDot: document.getElementById('mic-status-dot'),
+        topPillLevelBar: document.getElementById('top-pill-level-bar'),
+        topPillThresholdTick: document.getElementById('top-pill-threshold-tick'),
+        statusPillText: document.getElementById('status-pill-text'),
+
+        // Center Banner & Action Row
+        bannerHeadline: document.getElementById('banner-headline'),
+        bannerSubtext: document.getElementById('banner-subtext'),
+        btnPrimaryToggle: document.getElementById('btn-primary-toggle'),
+        iconPlay: document.getElementById('icon-play'),
+        iconPause: document.getElementById('icon-pause'),
+        btnPrimaryLabel: document.getElementById('btn-primary-label'),
+        btnResetSession: document.getElementById('btn-reset-session'),
+        recoveryBadge: document.getElementById('recovery-badge'),
+        recoveryCountdown: document.getElementById('recovery-countdown'),
+
+        // Scene SVG Elements
+        skyMonorailTrain: document.getElementById('sky-monorail-train'),
+        monorailUnderglow: document.getElementById('monorail-underglow'),
+        tractorBeamCone: document.getElementById('tractor-beam-cone'),
+        tractorBeamCore: document.getElementById('tractor-beam-core'),
+        gantryHoistAssembly: document.getElementById('gantry-hoist-assembly'),
+        hangingDashedSlot: document.getElementById('hanging-dashed-slot'),
+        hangingActiveBlock: document.getElementById('hanging-active-block'),
+        activeBlockFillRect: document.getElementById('active-block-fill-rect'),
+        buildingAssemblyLayer: document.getElementById('building-assembly-layer'),
+        buildingFxLayer: document.getElementById('building-fx-layer'),
+
+        // Robot Crew Elements
+        atlasBodyAnim: document.getElementById('atlas-body-anim'),
+        atlasChestWave: document.getElementById('atlas-chest-wave'),
+        atlasEyesHappy: document.getElementById('atlas-eyes-happy'),
+        atlasEyesLoud: document.getElementById('atlas-eyes-loud'),
+        atlasAntennaOrb: document.getElementById('atlas-antenna-orb'),
+
+        beepBodyAnim: document.getElementById('beep-body-anim'),
+        beepSignBoard: document.getElementById('beep-sign-board'),
+        beepSignText: document.getElementById('beep-sign-text'),
+        beepMouthArc: document.getElementById('beep-mouth-arc'),
+
+        boopBodyAnim: document.getElementById('boop-body-anim'),
+
+        // Bottom Progress & Controls
+        progressMinutesText: document.getElementById('progress-minutes-text'),
+        blueprintPillTag: document.getElementById('blueprint-pill-tag'),
+        blockSlotsRow: document.getElementById('block-slots-row'),
+
+        btnMicSettings: document.getElementById('btn-mic-settings'),
+        iconMicOn: document.getElementById('icon-mic-on'),
+        iconMicOff: document.getElementById('icon-mic-off'),
+        micPopover: document.getElementById('mic-popover'),
+        btnCloseMicPopover: document.getElementById('btn-close-mic-popover'),
+        selectMicDevice: document.getElementById('select-mic-device'),
+        thresholdValueLabel: document.getElementById('threshold-value-label'),
+        popoverLiveBar: document.getElementById('popover-live-bar'),
+        popoverThresholdMarker: document.getElementById('popover-threshold-marker'),
+        sliderThreshold: document.getElementById('slider-threshold'),
+        sliderSimNoise: document.getElementById('slider-sim-noise'),
+        btnResetSimNoise: document.getElementById('btn-reset-sim-noise'),
+        micModeStatusNote: document.getElementById('mic-mode-status-note'),
+        btnManualLoudToggle: document.getElementById('btn-manual-loud-toggle'),
+
+        btnToggleMusic: document.getElementById('btn-toggle-music'),
+        musicActiveDot: document.getElementById('music-active-dot'),
+        btnOpenSettings: document.getElementById('btn-open-settings'),
+        btnDoneSession: document.getElementById('btn-done-session'),
+
+        // Setup & Calibration Modal
+        modalSettings: document.getElementById('modal-settings'),
+        btnCloseSettings: document.getElementById('btn-close-settings'),
+        btnApplySettings: document.getElementById('btn-apply-settings'),
+        btnSettingsOpenSkyline: document.getElementById('btn-settings-open-skyline'),
+        sliderGoalMinutes: document.getElementById('slider-goal-minutes'),
+        goalMinutesDisplay: document.getElementById('goal-minutes-display'),
+        blueprintGrid: document.getElementById('blueprint-grid'),
+        btnStartCalibration: document.getElementById('btn-start-calibration'),
+        calibrationPanel: document.getElementById('calibration-panel'),
+        calibrationStepLabel: document.getElementById('calibration-step-label'),
+        calibrationTimerLabel: document.getElementById('calibration-timer-label'),
+        calibrationProgressBar: document.getElementById('calibration-progress-bar'),
+        calibrationLiveReading: document.getElementById('calibration-live-reading'),
+        btnCancelCalibration: document.getElementById('btn-cancel-calibration'),
+        checkboxManualMode: document.getElementById('checkbox-manual-mode'),
+        checkboxDemoSpeed: document.getElementById('checkbox-demo-speed'),
+
+        // Summary Modal
+        modalSummary: document.getElementById('modal-summary'),
+        summaryTitle: document.getElementById('summary-title'),
+        summarySubtitle: document.getElementById('summary-subtitle'),
+        summaryBuildingSvg: document.getElementById('summary-building-svg'),
+        statFocusTime: document.getElementById('stat-focus-time'),
+        statWaitsCount: document.getElementById('stat-waits-count'),
+        statLongestStretch: document.getElementById('stat-longest-stretch'),
+        btnSummaryViewTown: document.getElementById('btn-summary-view-town'),
+        btnSummaryNewBuild: document.getElementById('btn-summary-new-build'),
+
+        // Future City Skyline Modal
+        modalTown: document.getElementById('modal-town'),
+        btnCloseTown: document.getElementById('btn-close-town'),
+        btnTownDone: document.getElementById('btn-town-done'),
+        townStatsSub: document.getElementById('town-stats-sub'),
+        townGalleryBody: document.getElementById('town-gallery-body'),
+        btnTownClearAsk: document.getElementById('btn-town-clear-ask'),
+        townClearConfirmGroup: document.getElementById('town-clear-confirm-group'),
+        btnTownClearYes: document.getElementById('btn-town-clear-yes'),
+        btnTownClearNo: document.getElementById('btn-town-clear-no'),
+
+        // Toast
+        toastBanner: document.getElementById('toast-banner'),
+        toastText: document.getElementById('toast-text'),
+      };
+
+      // =====================================================================
+      // E. UI RENDERING & SCENE UPDATES
+      // =====================================================================
+      let toastTimeout = null;
+      function showToast(message) {
+        els.toastText.textContent = message;
+        els.toastBanner.classList.remove('opacity-0', '-translate-y-2');
+        els.toastBanner.classList.add('opacity-100', 'translate-y-0');
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+          els.toastBanner.classList.remove('opacity-100', 'translate-y-0');
+          els.toastBanner.classList.add('opacity-0', '-translate-y-2');
+        }, 2600);
+      }
+
+      function formatDuration(ms) {
+        const totalSec = Math.max(0, Math.floor(ms / 1000));
+        const mins = Math.floor(totalSec / 60);
+        const secs = totalSec % 60;
+        return `${mins}m ${String(secs).padStart(2, '0')}s`;
+      }
+
+      function renderSlotsRow() {
+        const total = state.goalMinutes;
+        const completed = state.completedMinutes;
+        const minuteRatio = Math.min(1, state.currentMinuteElapsedMs / state.minuteDurationMs);
+        const bp = BLUEPRINTS[state.blueprintId];
+
+        els.progressMinutesText.textContent = `${completed} of ${total} ${total === 1 ? 'minute' : 'minutes'}`;
+        els.blueprintPillTag.textContent = `${bp.icon} ${bp.name}`;
+        els.blockSlotsRow.setAttribute('aria-valuemax', String(total));
+        els.blockSlotsRow.setAttribute('aria-valuenow', String(completed));
+
+        const compact = total > 12;
+        const slotSizeClass = compact ? 'w-5 sm:w-6 h-5 sm:h-6 rounded-[5px]' : 'w-9 sm:w-11 h-7 sm:h-8 rounded-[7px]';
+
+        let html = '';
+        for (let i = 0; i < total; i++) {
+          if (i < completed) {
+            // Solid glowing cyber-module slot
+            html += `
+              <div
+                class="${slotSizeClass} border-2 border-ink shadow-[0_0_10px_rgba(56,232,255,0.45)] transition-all duration-300 relative overflow-hidden"
+                style="background-color: ${bp.blockColor};"
+                title="Module ${i + 1} locked!"
+              >
+                <div class="absolute inset-x-0 top-0 h-1.5 bg-white/40"></div>
+              </div>
+            `;
+          } else if (i === completed && (state.status === 'running' || state.status === 'paused' || state.status === 'waiting_quiet')) {
+            // Active charging cyber-module slot
+            const pct = Math.round(minuteRatio * 100);
+            html += `
+              <div
+                class="${slotSizeClass} border-2 border-dashed border-cyberCyan/85 bg-[#13263a]/80 relative overflow-hidden"
+                title="Module ${i + 1}: ${pct}% charged"
+              >
+                <div
+                  class="absolute inset-x-0 bottom-0 transition-all duration-100"
+                  style="height: ${pct}%; background-color: ${bp.blockColor}; opacity: 0.85;"
+                ></div>
+              </div>
+            `;
+          } else {
+            // Empty futuristic module slot
+            html += `
+              <div
+                class="${slotSizeClass} border-2 border-dashed border-frostedCard/45 bg-[#13263a]/55"
+                title="Module ${i + 1}"
+              ></div>
+            `;
+          }
+        }
+        els.blockSlotsRow.innerHTML = html;
+      }
+
+      function renderBuildingOnPad(triggerSparks = false) {
+        const bp = BLUEPRINTS[state.blueprintId];
+        const ratio = state.goalMinutes > 0 ? Math.min(1, state.completedMinutes / state.goalMinutes) : 0;
+        els.buildingAssemblyLayer.innerHTML = bp.render(ratio);
+
+        if (triggerSparks) {
+          els.buildingAssemblyLayer.classList.remove('module-lock-settle');
+          void els.buildingAssemblyLayer.offsetWidth;
+          els.buildingAssemblyLayer.classList.add('module-lock-settle');
+
+          els.buildingFxLayer.innerHTML = `
+            <circle cx="-54" cy="-10" r="10" fill="#38e8ff" class="energy-spark" />
+            <circle cx="54" cy="-10" r="10" fill="#38e8ff" class="energy-spark" />
+            <circle cx="0" cy="-35" r="9" fill="#ff7b47" class="energy-spark" />
+          `;
+          setTimeout(() => {
+            els.buildingFxLayer.innerHTML = '';
+          }, 720);
+        }
+      }
+
+      function updateGantryAndTractorBeam() {
+        const bp = BLUEPRINTS[state.blueprintId];
+        const minuteRatio = Math.min(1, state.currentMinuteElapsedMs / state.minuteDurationMs);
+
+        // Switch tractor beam between vibrant cyan (building) and warm coral-amber (paused / too loud)
+        const isAlertOrStandby = state.status === 'waiting_quiet' || state.status === 'paused';
+        if (isAlertOrStandby) {
+          els.tractorBeamCone.setAttribute('fill', 'url(#tractorAlertGrad)');
+          els.tractorBeamCore.setAttribute('stroke', '#ff7b47');
+        } else {
+          els.tractorBeamCone.setAttribute('fill', 'url(#tractorCyanGrad)');
+          els.tractorBeamCore.setAttribute('stroke', '#38e8ff');
+        }
+
+        // Calculate vertical lowering travel from gantry trolley (y = 196) toward pad (y = 534)
+        const buildingHeightOffset = Math.min(92, (state.completedMinutes / Math.max(1, state.goalMinutes)) * 92);
+        const maxBeamLength = 272 - buildingHeightOffset;
+        const minBeamLength = 94;
+
+        if (state.status === 'idle' || state.status === 'completed') {
+          els.tractorBeamCone.setAttribute('points', `-10,18 10,18 28,${minBeamLength} -28,${minBeamLength}`);
+          els.tractorBeamCore.setAttribute('y2', String(minBeamLength));
+          els.gantryHoistAssembly.setAttribute('transform', `translate(0, ${minBeamLength})`);
+          els.hangingDashedSlot.classList.remove('hidden');
+          els.hangingActiveBlock.classList.add('hidden');
+        } else {
+          const currentY = minBeamLength + (maxBeamLength - minBeamLength) * minuteRatio;
+          els.tractorBeamCone.setAttribute('points', `-10,18 10,18 30,${currentY.toFixed(1)} -30,${currentY.toFixed(1)}`);
+          els.tractorBeamCore.setAttribute('y2', currentY.toFixed(1));
+          els.gantryHoistAssembly.setAttribute('transform', `translate(0, ${currentY.toFixed(1)})`);
+
+          els.hangingDashedSlot.classList.add('hidden');
+          els.hangingActiveBlock.classList.remove('hidden');
+
+          const fillHeight = 44 * minuteRatio;
+          els.activeBlockFillRect.setAttribute('fill', bp.blockColor);
+          els.activeBlockFillRect.setAttribute('y', (22 - fillHeight).toFixed(1));
+          els.activeBlockFillRect.setAttribute('height', fillHeight.toFixed(1));
+        }
+      }
+
+      function updateRobotsAndBanner() {
+        const voiceObj = VOICE_LEVELS[state.voiceLevel];
+        const bp = BLUEPRINTS[state.blueprintId];
+
+        // 1. Top-Right Live Sound Pill
+        if (state.status === 'paused') {
+          els.statusPillText.innerHTML = `Standby / <span class="text-ink/65">Paused</span>`;
+          els.micStatusDot.className = 'relative inline-flex rounded-full h-2.5 w-2.5 bg-ink/40';
+        } else if (state.manualNoMicMode && state.simulatedNoise === 0) {
+          els.statusPillText.innerHTML = `Manual Mode: <span class="text-coralEnergy">${voiceObj.label}</span>`;
+          els.micStatusDot.className = 'relative inline-flex rounded-full h-2.5 w-2.5 bg-[#fbbf24]';
+        } else {
+          els.statusPillText.innerHTML = `Listening for: <span class="text-coralEnergy">${voiceObj.label}</span>`;
+          els.micStatusDot.className =
+            state.status === 'waiting_quiet'
+              ? 'relative inline-flex rounded-full h-2.5 w-2.5 bg-coralEnergy animate-ping'
+              : 'relative inline-flex rounded-full h-2.5 w-2.5 bg-coralEnergy';
+        }
+
+        // Mic button icon state
+        if (state.manualNoMicMode || AudioEngine.micDenied) {
+          els.iconMicOn.classList.add('hidden');
+          els.iconMicOff.classList.remove('hidden');
+        } else {
+          els.iconMicOn.classList.remove('hidden');
+          els.iconMicOff.classList.add('hidden');
+        }
+
+        // 2. Top-Center Speech Pill & Action Buttons
+        if (state.status === 'idle') {
+          els.bannerHeadline.innerHTML = `Systems online... <span class="text-coralEnergy">build!</span>`;
+          els.bannerSubtext.textContent = `${voiceObj.prompt}`;
+          els.bannerSubtext.classList.remove('hidden');
+          els.iconPlay.classList.remove('hidden');
+          els.iconPause.classList.add('hidden');
+          els.btnPrimaryLabel.textContent = 'Start';
+          els.btnPrimaryToggle.className =
+            'robo-btn-cyan px-6 py-2.5 rounded-full font-display font-bold text-base sm:text-lg flex items-center gap-2 cursor-pointer';
+          els.btnResetSession.classList.add('hidden');
+          els.recoveryBadge.classList.add('hidden');
+        } else if (state.status === 'running') {
+          els.bannerHeadline.innerHTML = `Quiet building <span class="text-[#0284c7]">active...</span>`;
+          els.bannerSubtext.textContent = `${voiceObj.prompt} • Constructing ${bp.name}`;
+          els.bannerSubtext.classList.remove('hidden');
+          els.iconPlay.classList.add('hidden');
+          els.iconPause.classList.remove('hidden');
+          els.btnPrimaryLabel.textContent = 'Pause';
+          els.btnPrimaryToggle.className =
+            'robo-btn px-4 py-1.5 rounded-full font-display font-bold text-xs sm:text-sm text-ink flex items-center gap-1.5 cursor-pointer';
+          els.btnResetSession.classList.remove('hidden');
+          els.btnResetSession.className =
+            'robo-btn px-3.5 py-1.5 rounded-full font-display font-bold text-xs sm:text-sm text-ink flex items-center gap-1 cursor-pointer';
+          els.recoveryBadge.classList.add('hidden');
+        } else if (state.status === 'paused') {
+          els.bannerHeadline.innerHTML = `Paused — <span class="text-coralEnergy">gantry in standby</span>`;
+          els.bannerSubtext.textContent = `Press Resume or [Space] when your class is ready`;
+          els.bannerSubtext.classList.remove('hidden');
+          els.iconPlay.classList.remove('hidden');
+          els.iconPause.classList.add('hidden');
+          els.btnPrimaryLabel.textContent = 'Resume';
+          els.btnPrimaryToggle.className =
+            'robo-btn-cyan px-6 py-2.5 rounded-full font-display font-bold text-base sm:text-lg flex items-center gap-2 cursor-pointer';
+          els.btnResetSession.classList.remove('hidden');
+          els.btnResetSession.className =
+            'robo-btn px-4 py-2.5 rounded-full font-display font-bold text-sm sm:text-base text-ink flex items-center gap-1.5 cursor-pointer';
+          els.recoveryBadge.classList.add('hidden');
+        } else if (state.status === 'waiting_quiet') {
+          els.bannerHeadline.innerHTML = `Too loud — <span class="text-coralEnergy">robots pausing!</span>`;
+          els.bannerSubtext.textContent = `Return to ${voiceObj.label} level to re-engage the tractor beam`;
+          els.bannerSubtext.classList.remove('hidden');
+          els.iconPlay.classList.add('hidden');
+          els.iconPause.classList.remove('hidden');
+          els.btnPrimaryLabel.textContent = 'Pause';
+          els.btnPrimaryToggle.className =
+            'robo-btn px-4 py-1.5 rounded-full font-display font-bold text-xs sm:text-sm text-ink flex items-center gap-1.5 cursor-pointer';
+          els.btnResetSession.classList.remove('hidden');
+        } else if (state.status === 'completed') {
+          els.bannerHeadline.innerHTML = `City sector <span class="text-coralEnergy">complete!</span>`;
+          els.bannerSubtext.textContent = `${bp.icon} ${bp.name} built in ${state.goalMinutes} quiet ${state.goalMinutes === 1 ? 'minute' : 'minutes'}!`;
+          els.bannerSubtext.classList.remove('hidden');
+          els.iconPlay.classList.remove('hidden');
+          els.iconPause.classList.add('hidden');
+          els.btnPrimaryLabel.textContent = 'Build Again';
+          els.btnPrimaryToggle.className =
+            'robo-btn-cyan px-6 py-2.5 rounded-full font-display font-bold text-base sm:text-lg flex items-center gap-2 cursor-pointer';
+          els.btnResetSession.classList.remove('hidden');
+          els.recoveryBadge.classList.add('hidden');
+        }
+
+        // 3. Robot Crew Expressions, Chest Waveform & BEEP's Holographic Sign
+        if (state.status === 'waiting_quiet') {
+          // Chief Bot A.T.L.A.S. worried/alert visor + spiky coral-red chest wave
+          els.atlasEyesHappy.classList.add('hidden');
+          els.atlasEyesLoud.classList.remove('hidden');
+          els.atlasAntennaOrb.setAttribute('fill', '#ff7b47');
+          els.atlasChestWave.setAttribute('stroke', '#ff7b47');
+          els.atlasChestWave.setAttribute('d', 'M-21,-51 L-15,-63 L-9,-39 L-3,-65 L3,-37 L9,-62 L15,-41 L21,-51');
+
+          // Helper Bot BEEP holographic sign switches to TOO LOUD coral-amber alert
+          els.beepSignBoard.setAttribute('fill', '#3b1814');
+          els.beepSignBoard.setAttribute('stroke', '#ff7b47');
+          els.beepSignText.setAttribute('fill', '#ff7b47');
+          els.beepSignText.textContent = 'TOO LOUD';
+          els.beepMouthArc.setAttribute('stroke', '#ff7b47');
+          els.beepMouthArc.setAttribute('d', 'M-3,4 A3,3 0 1,0 3,4 A3,3 0 1,0 -3,4');
+
+          // Sky-Monorail dims underglow while paused
+          els.monorailUnderglow.setAttribute('stroke', '#ff7b47');
+        } else {
+          // Chief Bot A.T.L.A.S. happy visor + calm cyan sine wave
+          els.atlasEyesHappy.classList.remove('hidden');
+          els.atlasEyesLoud.classList.add('hidden');
+          els.atlasAntennaOrb.setAttribute('fill', '#38e8ff');
+          els.atlasChestWave.setAttribute('stroke', '#38e8ff');
+          els.atlasChestWave.setAttribute('d', 'M-21,-51 Q-14,-57 -7,-51 T7,-51 T21,-51');
+
+          // Helper Bot BEEP holographic sign shows active voice level in glowing cyan
+          els.beepSignBoard.setAttribute('fill', '#123847');
+          els.beepSignBoard.setAttribute('stroke', '#38e8ff');
+          els.beepSignText.setAttribute('fill', '#38e8ff');
+          els.beepSignText.textContent = state.status === 'completed' ? 'COMPLETE!' : voiceObj.holoShort;
+          els.beepMouthArc.setAttribute('stroke', '#38e8ff');
+          els.beepMouthArc.setAttribute('d', 'M-4,3 Q0,6 4,3');
+
+          els.monorailUnderglow.setAttribute('stroke', '#38e8ff');
+        }
+      }
+
+      function triggerRobotsCheer() {
+        [els.atlasBodyAnim, els.beepBodyAnim, els.boopBodyAnim].forEach((el) => {
+          el.classList.remove('bot-cheer');
+          void el.offsetWidth;
+          el.classList.add('bot-cheer');
+        });
+      }
+
+      function syncVoicePresetButtons() {
+        document.querySelectorAll('.voice-preset-btn').forEach((btn) => {
+          const preset = btn.dataset.voicePreset;
+          if (preset === state.voiceLevel) {
+            btn.classList.add('bg-cyberCyan', 'text-ink', 'border-ink');
+            btn.classList.remove('bg-[#e6effa]', 'text-ink/80', 'border-ink/25');
+          } else {
+            btn.classList.remove('bg-cyberCyan', 'text-ink', 'border-ink');
+            btn.classList.add('bg-[#e6effa]', 'text-ink/80', 'border-ink/25');
+          }
+        });
+
+        els.sliderThreshold.value = String(state.threshold);
+        els.thresholdValueLabel.textContent = `${state.threshold}%`;
+        els.topPillThresholdTick.style.left = `${state.threshold}%`;
+        els.popoverThresholdMarker.style.left = `${state.threshold}%`;
+      }
+
+      // =====================================================================
+      // F. REAL-TIME ANIMATION & NOISE HYSTERESIS LOOP
+      // =====================================================================
+      let lastFrameTime = performance.now();
+
+      function tickLoop(now) {
+        const dt = Math.min(250, now - lastFrameTime);
+        lastFrameTime = now;
+
+        // 1. Read live room audio level
+        const level = AudioEngine.readNormalizedLevel();
+        state.liveAudioLevel = level;
+
+        const barColor = level > state.threshold ? '#ff7b47' : '#22c55e';
+        els.topPillLevelBar.style.width = `${Math.max(6, level)}%`;
+        els.topPillLevelBar.style.backgroundColor = barColor;
+        els.popoverLiveBar.style.width = `${Math.max(4, level)}%`;
+        els.popoverLiveBar.style.backgroundColor = barColor;
+
+        // 2. Sky-Monorail glides continuously when running/quiet (slows/pauses when too loud)
+        const monorailSpeed =
+          state.status === 'running' || state.status === 'completed'
+            ? 0.045
+            : state.status === 'idle'
+            ? 0.025
+            : 0;
+        if (monorailSpeed > 0) {
+          state.monorailX += monorailSpeed * dt;
+          if (state.monorailX > 1260) {
+            state.monorailX = -120;
+          }
+          els.skyMonorailTrain.setAttribute('transform', `translate(${state.monorailX.toFixed(1)}, 440)`);
+        }
+
+        // 3. Guided 20-second room calibration
+        if (state.calibrating) {
+          updateCalibrationTick(dt, level);
+        }
+
+        // 4. Active Timer & Transient Spike Filtering
+        if (state.status === 'running' || state.status === 'waiting_quiet') {
+          const isOverThreshold = level > state.threshold;
+          AudioEngine.updateMusicDucking(isOverThreshold || state.status === 'waiting_quiet');
+
+          if (state.status === 'running') {
+            if (isOverThreshold) {
+              state.aboveThresholdDurationMs += dt;
+              state.belowThresholdDurationMs = 0;
+
+              // Transient Spike (< 1.5s): subtle ripple on top-right sound pill without stopping gantry
+              if (now - state.lastSpikeRippleAt > 750) {
+                state.lastSpikeRippleAt = now;
+                els.micSpikeRing.classList.remove('hidden', 'mic-spike-ring');
+                void els.micSpikeRing.offsetWidth;
+                els.micSpikeRing.classList.add('mic-spike-ring');
+              }
+
+              // Sustained Noise (> 1.5s): pause construction and switch to Too Loud state
+              if (state.aboveThresholdDurationMs >= 1500) {
+                state.status = 'waiting_quiet';
+                state.waitCount += 1;
+                state.currentStretchMs = 0;
+                state.belowThresholdDurationMs = 0;
+                updateRobotsAndBanner();
+                updateGantryAndTractorBeam();
+              }
+            } else {
+              state.aboveThresholdDurationMs = 0;
+              advanceQuietProgress(dt);
+            }
+          } else if (state.status === 'waiting_quiet') {
+            if (!isOverThreshold) {
+              state.belowThresholdDurationMs += dt;
+              const remainingSec = Math.max(0, (2000 - state.belowThresholdDurationMs) / 1000);
+              els.recoveryBadge.classList.remove('hidden');
+              els.recoveryCountdown.textContent = remainingSec.toFixed(1);
+
+              // Require 2.0s of continuous quiet before resuming construction
+              if (state.belowThresholdDurationMs >= 2000) {
+                state.status = 'running';
+                state.aboveThresholdDurationMs = 0;
+                state.belowThresholdDurationMs = 0;
+                els.recoveryBadge.classList.add('hidden');
+                updateRobotsAndBanner();
+                updateGantryAndTractorBeam();
+              }
+            } else {
+              state.belowThresholdDurationMs = 0;
+              els.recoveryBadge.classList.add('hidden');
+            }
+          }
+        } else {
+          AudioEngine.updateMusicDucking(false);
+        }
+
+        requestAnimationFrame(tickLoop);
+      }
+
+      function advanceQuietProgress(dt) {
+        state.currentMinuteElapsedMs += dt;
+        state.totalFocusMs += dt;
+        state.currentStretchMs += dt;
+        if (state.currentStretchMs > state.longestStretchMs) {
+          state.longestStretchMs = state.currentStretchMs;
+        }
+
+        if (state.currentMinuteElapsedMs >= state.minuteDurationMs) {
+          state.currentMinuteElapsedMs = 0;
+          state.completedMinutes += 1;
+
+          renderBuildingOnPad(true);
+          triggerRobotsCheer();
+
+          if (state.completedMinutes >= state.goalMinutes) {
+            state.status = 'completed';
+            AudioEngine.playCelebrationFanfare();
+            updateGantryAndTractorBeam();
+            renderSlotsRow();
+            updateRobotsAndBanner();
+            return;
+          } else {
+            AudioEngine.playModuleLockChime();
+          }
+        }
+
+        updateGantryAndTractorBeam();
+        renderSlotsRow();
+      }
+
+      // =====================================================================
+      // G. SESSION CONTROLS (START, PAUSE, RESET, DONE, SKYLINE)
+      // =====================================================================
+      async function handlePrimaryStartPause() {
+        AudioEngine.ensureContext();
+
+        if (state.status === 'completed') {
+          resetCurrentBuild();
+        }
+
+        if (state.status === 'idle' || state.status === 'paused') {
+          if (!state.manualNoMicMode && !AudioEngine.micReady) {
+            const ok = await AudioEngine.initMicrophone(AudioEngine.selectedDeviceId);
+            if (!ok && state.simulatedNoise === 0) {
+              els.micModeStatusNote.textContent =
+                'Mic unavailable — use Simulate Room Noise slider or press [P].';
+              showToast('Mic not detected — use Simulate slider or [P] key');
+            } else if (ok) {
+              els.micModeStatusNote.textContent = 'Live classroom audio sensors online!';
+            }
+          }
+          state.status = 'running';
+          state.aboveThresholdDurationMs = 0;
+          state.belowThresholdDurationMs = 0;
+          updateRobotsAndBanner();
+          updateGantryAndTractorBeam();
+          renderSlotsRow();
+        } else if (state.status === 'running' || state.status === 'waiting_quiet') {
+          state.status = 'paused';
+          state.manualLoudForced = false;
+          updateRobotsAndBanner();
+          updateGantryAndTractorBeam();
+        }
+      }
+
+      function resetCurrentBuild() {
+        state.status = 'idle';
+        state.completedMinutes = 0;
+        state.currentMinuteElapsedMs = 0;
+        state.totalFocusMs = 0;
+        state.currentStretchMs = 0;
+        state.longestStretchMs = 0;
+        state.waitCount = 0;
+        state.aboveThresholdDurationMs = 0;
+        state.belowThresholdDurationMs = 0;
+        state.manualLoudForced = false;
+
+        renderBuildingOnPad(false);
+        updateGantryAndTractorBeam();
+        renderSlotsRow();
+        updateRobotsAndBanner();
+      }
+
+      function finishSessionAndShowSummary() {
+        if (state.status === 'running' || state.status === 'waiting_quiet') {
+          state.status = 'paused';
+          updateRobotsAndBanner();
+          updateGantryAndTractorBeam();
+        }
+
+        const bp = BLUEPRINTS[state.blueprintId];
+        const ratio = state.goalMinutes > 0 ? Math.min(1, state.completedMinutes / state.goalMinutes) : 0;
+
+        let savedToTown = false;
+        if (state.completedMinutes >= 1) {
+          state.town.unshift({
+            id: Date.now(),
+            blueprintId: state.blueprintId,
+            name: bp.name,
+            icon: bp.icon,
+            minutesBuilt: state.completedMinutes,
+            goalMinutes: state.goalMinutes,
+            ratio: ratio,
+            voiceLevel: VOICE_LEVELS[state.voiceLevel].label,
+            date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+          });
+          saveTownToStorage();
+          updateTownCountBadge();
+          savedToTown = true;
+          AudioEngine.playCelebrationFanfare();
+        }
+
+        els.summaryTitle.textContent =
+          ratio >= 1 ? `${bp.name} Complete!` : state.completedMinutes > 0 ? 'Great Quiet Focus!' : 'Session Summary';
+        els.summarySubtitle.textContent = savedToTown
+          ? `Your ${bp.name} (${state.completedMinutes}/${state.goalMinutes} min) was added to the Future City Skyline!`
+          : `Build at least 1 quiet minute to add a landmark to your Future City Skyline.`;
+
+        els.summaryBuildingSvg.innerHTML = `
+          <rect x="-88" y="-8" width="176" height="8" rx="3" fill="#3b5169" stroke="#162233" stroke-width="2" />
+          <g transform="translate(0, -8)">${bp.render(Math.max(0.18, ratio))}</g>
+        `;
+
+        els.statFocusTime.textContent = formatDuration(state.totalFocusMs);
+        els.statWaitsCount.textContent = String(state.waitCount);
+        els.statLongestStretch.textContent = formatDuration(state.longestStretchMs);
+
+        els.modalSummary.classList.remove('hidden');
+      }
+
+      function updateTownCountBadge() {
+        els.townCountBadge.textContent = String(state.town.length);
+      }
+
+      function renderClassTownModal() {
+        updateTownCountBadge();
+        els.townClearConfirmGroup.classList.add('hidden');
+        els.btnTownClearAsk.classList.remove('hidden');
+
+        if (state.town.length === 0) {
+          els.townStatsSub.textContent = 'No landmarks yet — finish a quiet timer to construct your first sci-fi tower!';
+          els.townGalleryBody.innerHTML = `
+            <div class="text-center py-10 px-4">
+              <div class="text-5xl mb-3" aria-hidden="true">🤖🏙️✨</div>
+              <h3 class="font-display font-bold text-lg text-ink mb-1">Your Future City Grid is Ready!</h3>
+              <p class="text-xs sm:text-sm font-bold text-ink/75 max-w-sm mx-auto">
+                Start the quiet timer and keep voices low. Every completed session adds a futuristic landmark to your classroom skyline!
+              </p>
+            </div>
+          `;
+          return;
+        }
+
+        const totalTownMinutes = state.town.reduce((acc, item) => acc + (item.minutesBuilt || 0), 0);
+        els.townStatsSub.textContent = `${state.town.length} ${state.town.length === 1 ? 'landmark' : 'landmarks'} • ${totalTownMinutes} total quiet focus minutes`;
+
+        els.townGalleryBody.innerHTML = `
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            ${state.town
+              .map((item) => {
+                const bp = BLUEPRINTS[item.blueprintId] || BLUEPRINTS.ecotower;
+                const completeBadge =
+                  item.ratio >= 1
+                    ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#22c55e] text-white">Complete</span>`
+                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-coralEnergy text-white">${item.minutesBuilt}/${item.goalMinutes}m</span>`;
+                return `
+                  <div class="bg-[#e6effa] rounded-2xl p-3 border-2 border-ink/25 flex flex-col items-center text-center">
+                    <div class="w-full h-28 rounded-xl bg-[#182e46] border-2 border-ink mb-2 flex items-end justify-center overflow-hidden">
+                      <svg viewBox="-95 -150 190 158" class="w-full h-full">
+                        <rect x="-95" y="-12" width="190" height="16" fill="#243547" />
+                        <line x1="-95" y1="-12" x2="95" y2="-12" stroke="#38e8ff" stroke-width="2" />
+                        <g transform="translate(0, -12)">${bp.render(item.ratio || 1)}</g>
+                      </svg>
+                    </div>
+                    <div class="font-display font-bold text-sm text-ink leading-tight">${bp.icon} ${bp.name}</div>
+                    <div class="flex items-center gap-1.5 mt-1">
+                      ${completeBadge}
+                      <span class="text-[10px] font-bold text-ink/65">${item.date || ''}</span>
+                    </div>
+                  </div>
+                `;
+              })
+              .join('')}
+          </div>
+        `;
+      }
+
+      // =====================================================================
+      // H. 20-SECOND GUIDED ROOM CALIBRATION
+      // =====================================================================
+      async function startGuidedCalibration() {
+        AudioEngine.ensureContext();
+        const ok = await AudioEngine.initMicrophone(AudioEngine.selectedDeviceId);
+        if (!ok && state.simulatedNoise === 0) {
+          showToast('Microphone access needed for 20s room calibration');
+          return;
+        }
+
+        state.calibrating = true;
+        state.calibrationElapsedMs = 0;
+        state.silenceSamples = [];
+        state.voiceSamples = [];
+
+        els.calibrationPanel.classList.remove('hidden');
+        els.btnStartCalibration.disabled = true;
+        els.btnStartCalibration.classList.add('opacity-50');
+      }
+
+      function cancelCalibration() {
+        state.calibrating = false;
+        els.calibrationPanel.classList.add('hidden');
+        els.btnStartCalibration.disabled = false;
+        els.btnStartCalibration.classList.remove('opacity-50');
+      }
+
+      function updateCalibrationTick(dt, currentLevel) {
+        state.calibrationElapsedMs += dt;
+        const totalCalibrationMs = 20000;
+        const pct = Math.min(100, (state.calibrationElapsedMs / totalCalibrationMs) * 100);
+        els.calibrationProgressBar.style.width = `${pct}%`;
+
+        if (state.calibrationElapsedMs <= 10000) {
+          state.silenceSamples.push(currentLevel);
+          const secLeft = Math.ceil((10000 - state.calibrationElapsedMs) / 1000);
+          els.calibrationStepLabel.textContent = 'Step 1/2: Total Room Silence...';
+          els.calibrationTimerLabel.textContent = `${secLeft}s`;
+          els.calibrationLiveReading.textContent = `Sampling baseline silence: ${currentLevel}%`;
+        } else if (state.calibrationElapsedMs <= 20000) {
+          state.voiceSamples.push(currentLevel);
+          const secLeft = Math.ceil((20000 - state.calibrationElapsedMs) / 1000);
+          const voiceLabel = VOICE_LEVELS[state.voiceLevel].label;
+          els.calibrationStepLabel.textContent = `Step 2/2: Practice "${voiceLabel}" Voice...`;
+          els.calibrationTimerLabel.textContent = `${secLeft}s`;
+          els.calibrationLiveReading.textContent = `Sampling ${voiceLabel.toLowerCase()} level: ${currentLevel}%`;
+        } else {
+          const avgSilence =
+            state.silenceSamples.reduce((a, b) => a + b, 0) / Math.max(1, state.silenceSamples.length);
+          const avgVoice =
+            state.voiceSamples.reduce((a, b) => a + b, 0) / Math.max(1, state.voiceSamples.length);
+
+          const computed = Math.round(Math.max(avgSilence + 12, avgVoice + 8));
+          state.threshold = Math.min(88, Math.max(14, computed));
+          syncVoicePresetButtons();
+          cancelCalibration();
+          showToast(`Robo-sensors calibrated! Threshold set to ${state.threshold}%`);
+        }
+      }
+
+      // =====================================================================
+      // I. POPULATE BLUEPRINT GRID & WIRE EVENT LISTENERS
+      // =====================================================================
+      function renderBlueprintCardsInSettings() {
+        els.blueprintGrid.innerHTML = Object.values(BLUEPRINTS)
+          .map((bp) => {
+            const isSelected = bp.id === state.blueprintId;
+            return `
+              <button
+                type="button"
+                data-select-blueprint="${bp.id}"
+                class="p-2.5 rounded-2xl border-2 text-center transition-all cursor-pointer flex flex-col items-center ${
+                  isSelected
+                    ? 'bg-cyberCyan/20 border-ink shadow-[0_3px_0_#162233]'
+                    : 'bg-[#e6effa] border-ink/25 hover:bg-white'
+                }"
+              >
+                <div class="w-full h-20 rounded-xl bg-[#182e46] border border-ink flex items-end justify-center mb-1.5 overflow-hidden">
+                  <svg viewBox="-90 -150 180 158" class="w-full h-full">
+                    <rect x="-85" y="-6" width="170" height="8" fill="#243547" />
+                    <line x1="-85" y1="-6" x2="85" y2="-6" stroke="#38e8ff" stroke-width="2" />
+                    <g transform="translate(0, -6)">${bp.render(1)}</g>
+                  </svg>
+                </div>
+                <span class="font-display font-bold text-xs text-ink">${bp.icon} ${bp.name}</span>
+              </button>
+            `;
+          })
+          .join('');
+      }
+
+      // Start / Pause & Reset
+      els.btnPrimaryToggle.addEventListener('click', handlePrimaryStartPause);
+      els.btnResetSession.addEventListener('click', () => {
+        resetCurrentBuild();
+        showToast('Construction pad cleared');
+      });
+
+      // Top-Right Sound Pill & Bottom-Right Mic Button toggle Mic Popover
+      function toggleMicPopover(e) {
+        e.stopPropagation();
+        els.micPopover.classList.toggle('hidden');
+      }
+      els.btnStatusPill.addEventListener('click', toggleMicPopover);
+      els.btnMicSettings.addEventListener('click', toggleMicPopover);
+      els.btnCloseMicPopover.addEventListener('click', () => els.micPopover.classList.add('hidden'));
+
+      document.addEventListener('click', (e) => {
+        if (
+          !els.micPopover.classList.contains('hidden') &&
+          !els.micPopover.contains(e.target) &&
+          !els.btnMicSettings.contains(e.target) &&
+          !els.btnStatusPill.contains(e.target)
+        ) {
+          els.micPopover.classList.add('hidden');
+        }
+      });
+
+      // Microphone device selection change
+      els.selectMicDevice.addEventListener('change', async (e) => {
+        AudioEngine.selectedDeviceId = e.target.value;
+        AudioEngine.micReady = false;
+        const ok = await AudioEngine.initMicrophone(AudioEngine.selectedDeviceId);
+        if (ok) {
+          showToast('Switched classroom microphone input');
+        }
+      });
+
+      // Voice Level Presets
+      document.querySelectorAll('.voice-preset-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const presetKey = btn.dataset.voicePreset;
+          if (VOICE_LEVELS[presetKey]) {
+            state.voiceLevel = presetKey;
+            state.threshold = VOICE_LEVELS[presetKey].threshold;
+            syncVoicePresetButtons();
+            updateRobotsAndBanner();
+          }
+        });
+      });
+
+      // Sensitivity Threshold Slider & Simulate Noise Slider
+      els.sliderThreshold.addEventListener('input', (e) => {
+        state.threshold = parseInt(e.target.value, 10);
+        syncVoicePresetButtons();
+      });
+
+      els.sliderSimNoise.addEventListener('input', (e) => {
+        state.simulatedNoise = parseInt(e.target.value, 10);
+        if (state.simulatedNoise > 0) {
+          els.micModeStatusNote.textContent = `Simulating room noise: ${state.simulatedNoise}%`;
+        } else {
+          els.micModeStatusNote.textContent = AudioEngine.micReady
+            ? 'Live classroom audio sensors online!'
+            : 'Live mic activates automatically when you press Start.';
+        }
+      });
+
+      els.btnResetSimNoise.addEventListener('click', () => {
+        state.simulatedNoise = 0;
+        els.sliderSimNoise.value = '0';
+        els.micModeStatusNote.textContent = AudioEngine.micReady
+          ? 'Live classroom audio sensors online!'
+          : 'Switched back to live microphone.';
+      });
+
+      // Manual "Too Loud" Toggle
+      function toggleManualTooLoud() {
+        if (state.status === 'idle' || state.status === 'completed') {
+          showToast('Start building first to test Too Loud pause');
+          return;
+        }
+        if (state.status === 'running') {
+          state.manualLoudForced = true;
+          state.status = 'waiting_quiet';
+          state.waitCount += 1;
+          state.currentStretchMs = 0;
+          state.belowThresholdDurationMs = 0;
+          updateRobotsAndBanner();
+          updateGantryAndTractorBeam();
+        } else if (state.status === 'waiting_quiet') {
+          state.manualLoudForced = false;
+          state.status = 'running';
+          state.aboveThresholdDurationMs = 0;
+          state.belowThresholdDurationMs = 0;
+          els.recoveryBadge.classList.add('hidden');
+          updateRobotsAndBanner();
+          updateGantryAndTractorBeam();
+        }
+      }
+      els.btnManualLoudToggle.addEventListener('click', toggleManualTooLoud);
+
+      // Calm Space-Synth Music Toggle
+      function toggleCalmMusic() {
+        state.musicEnabled = !state.musicEnabled;
+        els.btnToggleMusic.setAttribute('aria-pressed', String(state.musicEnabled));
+        if (state.musicEnabled) {
+          els.musicActiveDot.classList.remove('hidden');
+          AudioEngine.startCalmMusic();
+          showToast('Calm space-synth pads on (auto-ducks if loud)');
+        } else {
+          els.musicActiveDot.classList.add('hidden');
+          AudioEngine.stopCalmMusic();
+          showToast('Calm space-synth pads off');
+        }
+      }
+      els.btnToggleMusic.addEventListener('click', toggleCalmMusic);
+
+      // Blueprint & Room Setup Modal
+      function openSettingsModal() {
+        els.sliderGoalMinutes.value = String(state.goalMinutes);
+        els.goalMinutesDisplay.textContent = `${state.goalMinutes} ${state.goalMinutes === 1 ? 'minute' : 'minutes'}`;
+        els.checkboxManualMode.checked = state.manualNoMicMode;
+        els.checkboxDemoSpeed.checked = state.minuteDurationMs === 6000;
+        renderBlueprintCardsInSettings();
+        els.modalSettings.classList.remove('hidden');
+      }
+      function closeSettingsModal() {
+        if (state.calibrating) cancelCalibration();
+        els.modalSettings.classList.add('hidden');
+      }
+
+      els.btnOpenSettings.addEventListener('click', openSettingsModal);
+      els.btnOpenCalibrate.addEventListener('click', openSettingsModal);
+      els.btnCloseSettings.addEventListener('click', closeSettingsModal);
+      els.btnApplySettings.addEventListener('click', closeSettingsModal);
+
+      els.btnSettingsOpenSkyline.addEventListener('click', () => {
+        closeSettingsModal();
+        renderClassTownModal();
+        els.modalTown.classList.remove('hidden');
+      });
+
+      els.sliderGoalMinutes.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        state.goalMinutes = val;
+        if (state.completedMinutes >= state.goalMinutes) {
+          state.completedMinutes = Math.max(0, state.goalMinutes - 1);
+        }
+        els.goalMinutesDisplay.textContent = `${val} ${val === 1 ? 'minute' : 'minutes'}`;
+        renderSlotsRow();
+        renderBuildingOnPad(false);
+        updateGantryAndTractorBeam();
+      });
+
+      document.querySelectorAll('.goal-preset-chip').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          const val = parseInt(chip.dataset.goalPreset, 10);
+          state.goalMinutes = val;
+          if (state.completedMinutes >= state.goalMinutes) {
+            state.completedMinutes = Math.max(0, state.goalMinutes - 1);
+          }
+          els.sliderGoalMinutes.value = String(val);
+          els.goalMinutesDisplay.textContent = `${val} minutes`;
+          renderSlotsRow();
+          renderBuildingOnPad(false);
+          updateGantryAndTractorBeam();
+        });
+      });
+
+      els.blueprintGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('[data-select-blueprint]');
+        if (!card) return;
+        const bpId = card.dataset.selectBlueprint;
+        if (BLUEPRINTS[bpId]) {
+          state.blueprintId = bpId;
+          renderBlueprintCardsInSettings();
+          renderSlotsRow();
+          renderBuildingOnPad(false);
+          updateGantryAndTractorBeam();
+          updateRobotsAndBanner();
+        }
+      });
+
+      els.checkboxManualMode.addEventListener('change', (e) => {
+        state.manualNoMicMode = e.target.checked;
+        updateRobotsAndBanner();
+      });
+
+      els.checkboxDemoSpeed.addEventListener('change', (e) => {
+        state.minuteDurationMs = e.target.checked ? 6000 : 60000;
+        showToast(e.target.checked ? 'Quick demo speed: 6s per module' : 'Standard clock: 60s per module');
+      });
+
+      els.btnStartCalibration.addEventListener('click', startGuidedCalibration);
+      els.btnCancelCalibration.addEventListener('click', cancelCalibration);
+
+      // Done Pill & Summary Celebration Modal
+      els.btnDoneSession.addEventListener('click', finishSessionAndShowSummary);
+      els.btnSummaryNewBuild.addEventListener('click', () => {
+        els.modalSummary.classList.add('hidden');
+        resetCurrentBuild();
+      });
+      els.btnSummaryViewTown.addEventListener('click', () => {
+        els.modalSummary.classList.add('hidden');
+        renderClassTownModal();
+        els.modalTown.classList.remove('hidden');
+      });
+
+      // Future City Skyline Modal
+      els.btnOpenTown.addEventListener('click', () => {
+        renderClassTownModal();
+        els.modalTown.classList.remove('hidden');
+      });
+      els.btnCloseTown.addEventListener('click', () => els.modalTown.classList.add('hidden'));
+      els.btnTownDone.addEventListener('click', () => els.modalTown.classList.add('hidden'));
+
+      els.btnTownClearAsk.addEventListener('click', () => {
+        els.btnTownClearAsk.classList.add('hidden');
+        els.townClearConfirmGroup.classList.remove('hidden');
+      });
+      els.btnTownClearNo.addEventListener('click', () => {
+        els.townClearConfirmGroup.classList.add('hidden');
+        els.btnTownClearAsk.classList.remove('hidden');
+      });
+      els.btnTownClearYes.addEventListener('click', () => {
+        state.town = [];
+        saveTownToStorage();
+        renderClassTownModal();
+        showToast('Future City Skyline cleared');
+      });
+
+      // Keyboard Shortcuts: Space (Start/Pause), P (Manual Too Loud), M (Calm Synth)
+      document.addEventListener('keydown', (e) => {
+        const tag = e.target && e.target.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+        if (e.key === 'Escape') {
+          els.micPopover.classList.add('hidden');
+          closeSettingsModal();
+          els.modalSummary.classList.add('hidden');
+          els.modalTown.classList.add('hidden');
+          return;
+        }
+
+        if (e.code === 'Space') {
+          e.preventDefault();
+          handlePrimaryStartPause();
+        } else if (e.key === 'p' || e.key === 'P') {
+          e.preventDefault();
+          toggleManualTooLoud();
+        } else if (e.key === 'm' || e.key === 'M') {
+          e.preventDefault();
+          toggleCalmMusic();
+        }
+      });
+
+      // =====================================================================
+      // J. INITIALIZE SCENE ON LOAD
+      // =====================================================================
+      updateTownCountBadge();
+      syncVoicePresetButtons();
+      renderSlotsRow();
+      renderBuildingOnPad(false);
+      updateGantryAndTractorBeam();
+      updateRobotsAndBanner();
+      requestAnimationFrame(tickLoop);
+    })();
+  </script>
+</body>
+</html>
